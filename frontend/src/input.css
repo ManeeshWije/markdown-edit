@@ -21,7 +21,11 @@ body {
 }
 
 .preview-visible .preview {
-    width: 50%; /* Adjust this value as needed */
+    width: 50%;
     border-left: 1px solid #ccc;
     padding-left: 10px;
+}
+
+.markdown > * {
+  all: revert;
 }

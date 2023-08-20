@@ -1,8 +1,9 @@
 import { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
-import { marked } from "marked";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm'
 import Tools from "./components/Tools";
 import "./input.css";
 
@@ -28,6 +29,7 @@ export default function App() {
             >
                 <CodeMirror
                     value={markdownContent}
+                    autoFocus
                     onChange={handleCodeMirrorChange}
                     extensions={[
                         markdown({
@@ -38,12 +40,11 @@ export default function App() {
                     className="flex-1"
                 />
                 {showPreview && (
-                    <div
-                        className="preview"
-                        dangerouslySetInnerHTML={{
-                            __html: marked.parse(markdownContent),
-                        }}
-                    />
+                    <div className="preview markdown">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {markdownContent}
+                        </ReactMarkdown>
+                    </div>
                 )}
             </div>
         </div>
