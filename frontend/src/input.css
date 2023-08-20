@@ -6,3 +6,22 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.editor-container {
+    display: flex;
+    align-items: stretch;
+}
+
+.preview-visible .editor-container {
+    flex-direction: row;
+}
+
+.preview-visible .CodeMirror {
+    flex: 1;
+}
+
+.preview-visible .preview {
+    width: 50%; /* Adjust this value as needed */
+    border-left: 1px solid #ccc;
+    padding-left: 10px;
+}
