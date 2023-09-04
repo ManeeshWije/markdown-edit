@@ -13,6 +13,7 @@ export default function App() {
 
     const handleCodeMirrorChange = (value: string) => {
         setMarkdownContent(value);
+        localStorage.setItem("markdownContent", value);
     };
 
     const togglePreview = () => {
@@ -28,7 +29,7 @@ export default function App() {
                 }`}
             >
                 <CodeMirror
-                    value={markdownContent}
+                    value={localStorage.getItem("markdownContent") || markdownContent}
                     autoFocus
                     onChange={handleCodeMirrorChange}
                     extensions={[
@@ -42,7 +43,7 @@ export default function App() {
                 {showPreview && (
                     <div className="preview markdown">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {markdownContent}
+                            {localStorage.getItem("markdownContent") || markdownContent}
                         </ReactMarkdown>
                     </div>
                 )}
