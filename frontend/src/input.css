@@ -27,5 +27,10 @@ body {
 }
 
 .markdown > * {
-  all: revert;
+    all: revert;
+}
+
+.dark-mode {
+    background-color: rgb(12, 12, 23);
+    color: white;
 }
