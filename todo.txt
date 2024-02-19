@@ -1,8 +1,0 @@
-[X] save current file in localstorage so text is not lost on refresh
-[] Fix UI bugs such as long horizontal lines mess up view and toggle preview (should wrap I think)
-[X] Add dark mode
-[] implement basic auth using Auth0 and sqlx
-[] implement saving current file as md, html, and pdf
-[] implement user accounts
-[] generate links based on current session and start websocket implementation
-[] implement websocket for live collaboration

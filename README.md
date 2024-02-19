@@ -1,2 +1,2 @@
 # markdown-edit
-real time collaborative markdown editor
+A personal markdown editor that implements previewing and exporting of markdown documents
