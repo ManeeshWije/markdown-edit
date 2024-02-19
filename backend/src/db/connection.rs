@@ -1,6 +1,6 @@
 use sqlx::postgres::PgPoolOptions;
 
-pub async fn connect(db_url: &str) -> Result<(), sqlx::Error> {
+pub async fn connect(db_url: &str) -> Result<sqlx::PgPool, sqlx::Error> {
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(db_url)
@@ -16,7 +16,7 @@ pub async fn connect(db_url: &str) -> Result<(), sqlx::Error> {
     }
     .await
     {
-        Ok(_) => Ok(()),
+        Ok(_) => Ok(pool),
         Err(err) => Err(err),
     }
 }

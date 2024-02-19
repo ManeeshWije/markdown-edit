@@ -1,4 +1,5 @@
 use axum::http::{Response, StatusCode};
+use axum::Json;
 use axum::{
     body::Body,
     routing::{get, post},
@@ -6,16 +7,26 @@ use axum::{
 };
 use uuid::Uuid;
 
+use crate::db::queries;
 use crate::models::user::User;
 
-pub fn users_routes() -> Router {
+pub fn users_routes(pool: sqlx::PgPool) -> Router {
+    let pool_clone = pool.clone();
     Router::new()
-        .route("/:uuid", get(get_user_by_id))
-        .route("/create", post(create_user))
+        .route(
+            "/create",
+            post(move |user: Json<User>| create_user(pool.clone(), user)),
+        )
+        .route(
+            "/:uuid",
+            get(|params: axum::extract::Path<String>| get_user_by_uuid(pool_clone, params)),
+        )
 }
 
-// return json response with user data
-async fn get_user_by_id(params: axum::extract::Path<String>) -> impl axum::response::IntoResponse {
+async fn get_user_by_uuid(
+    pool: sqlx::PgPool,
+    params: axum::extract::Path<String>,
+) -> impl axum::response::IntoResponse {
     // parse the uuid from the path and if its invalid return a 400
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
@@ -27,11 +38,15 @@ async fn get_user_by_id(params: axum::extract::Path<String>) -> impl axum::respo
         }
     };
 
-    // TODO: fetch the user from the database
-    let user = User {
-        uuid: uuid.to_string(),
-        username: "test_get".to_string(),
-        email: "test_get@email.com".to_string(),
+    let user = match queries::fetch_user_by_uuid(&pool, uuid).await {
+        Ok(user) => user,
+        Err(err) => {
+            eprintln!("Database error: {}", err);
+            return Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to fetch user"))
+                .unwrap();
+        }
     };
 
     Response::builder()
@@ -41,13 +56,28 @@ async fn get_user_by_id(params: axum::extract::Path<String>) -> impl axum::respo
         .unwrap()
 }
 
-// create a new user and return the user data in a json response
-async fn create_user() -> impl axum::response::IntoResponse {
-    // TODO: create a new user in the database
-    let user = User {
-        uuid: Uuid::new_v4().to_string(),
-        username: "test_create".to_string(),
-        email: "test_create@email.com".to_string(),
+async fn create_user(pool: sqlx::PgPool, request: Json<User>) -> impl axum::response::IntoResponse {
+    let request_body = request.0;
+    let uuid = request_body.uuid;
+    let username = request_body.username;
+    let email = request_body.email;
+
+    let user = match queries::create_user(
+        &pool,
+        uuid,
+        username.clone().as_str(),
+        email.clone().as_str(),
+    )
+    .await
+    {
+        Ok(user) => user,
+        Err(err) => {
+            eprintln!("Database error: {}", err);
+            return Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from("Failed to create user"))
+                .unwrap();
+        }
     };
 
     Response::builder()
