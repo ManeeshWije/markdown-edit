@@ -1,5 +1,4 @@
-use std::sync::Arc;
-
+use axum::extract::State;
 use axum::http::{Response, StatusCode};
 use axum::Json;
 use axum::{
@@ -13,44 +12,23 @@ use crate::db::queries;
 use crate::models::user::User;
 
 pub fn users_routes(pool: sqlx::PgPool) -> Router {
-    let pool_arc = Arc::new(pool);
-
-    let post_pool_arc = pool_arc.clone();
-    let get_pool_arc = pool_arc.clone();
-    let put_pool_arc = pool_arc.clone();
-    let delete_pool_arc = pool_arc.clone();
-
     Router::new()
-        .route(
-            "/create",
-            post(move |user: Json<User>| create_user(post_pool_arc, user)),
-        )
-        .route(
-            "/:uuid",
-            get(|params: axum::extract::Path<String>| get_user_by_uuid(get_pool_arc, params)),
-        )
-        .route(
-            "/update",
-            put(move |user: Json<User>| update_user(put_pool_arc, user)),
-        )
-        .route(
-            "/delete/:uuid",
-            delete(|params: axum::extract::Path<String>| delete_user(delete_pool_arc, params)),
-        )
+        .route("/:uuid", get(get_user_by_uuid))
+        .route("/create", post(create_user))
+        .route("/update", put(update_user))
+        .route("/delete/:uuid", delete(delete_user))
+        .with_state(pool)
 }
 
 async fn get_user_by_uuid(
-    pool: Arc<sqlx::PgPool>,
+    State(pool): State<sqlx::PgPool>,
     params: axum::extract::Path<String>,
-) -> impl axum::response::IntoResponse {
+) -> Result<Json<User>, String> {
     // parse the uuid from the path and if its invalid return a 400
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
         Err(_) => {
-            return Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from("Invalid UUID"))
-                .unwrap()
+            return Err("Invalid UUID".to_string());
         }
     };
 
@@ -58,24 +36,17 @@ async fn get_user_by_uuid(
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from("Failed to fetch user"))
-                .unwrap();
+            return Err("Failed to fetch user".to_string());
         }
     };
 
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(Body::from(serde_json::to_string(&user).unwrap()))
-        .unwrap()
+    Ok(Json(user))
 }
 
 async fn create_user(
-    pool: Arc<sqlx::PgPool>,
+    State(pool): State<sqlx::PgPool>,
     request: Json<User>,
-) -> impl axum::response::IntoResponse {
+) -> Result<Json<User>, String> {
     let request_body = request.0;
     let uuid = request_body.uuid;
     let username = request_body.username;
@@ -92,24 +63,17 @@ async fn create_user(
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from("Failed to create user"))
-                .unwrap();
+            return Err("Failed to create user".to_string());
         }
     };
 
-    Response::builder()
-        .status(StatusCode::CREATED)
-        .header("Content-Type", "application/json")
-        .body(Body::from(serde_json::to_string(&user).unwrap()))
-        .unwrap()
+    Ok(Json(user))
 }
 
 async fn update_user(
-    pool: Arc<sqlx::PgPool>,
+    State(pool): State<sqlx::PgPool>,
     request: Json<User>,
-) -> impl axum::response::IntoResponse {
+) -> Result<Json<User>, String> {
     let request_body = request.0;
     let uuid = request_body.uuid;
     let username = request_body.username;
@@ -119,45 +83,35 @@ async fn update_user(
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::from("Failed to update user"))
-                .unwrap();
+            return Err("Failed to update user".to_string());
         }
     };
 
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("Content-Type", "application/json")
-        .body(Body::from(serde_json::to_string(&user).unwrap()))
-        .unwrap()
+    Ok(Json(user))
 }
 
 async fn delete_user(
-    pool: Arc<sqlx::PgPool>,
+    State(pool): State<sqlx::PgPool>,
     params: axum::extract::Path<String>,
-) -> impl axum::response::IntoResponse {
+) -> Result<Response<Body>, String> {
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
         Err(_) => {
-            return Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .body(Body::from("Invalid UUID"))
-                .unwrap()
+            return Err("Invalid UUID".to_string());
         }
     };
 
     match queries::delete_user(&pool, uuid).await {
-        Ok(_) => Response::builder()
+        Ok(_) => Ok(Response::builder()
             .status(StatusCode::OK)
             .body(Body::from("User deleted"))
-            .unwrap(),
+            .unwrap()),
         Err(err) => {
             eprintln!("Database error: {}", err);
-            Response::builder()
+            Ok(Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::from("Failed to delete user"))
-                .unwrap()
+                .unwrap())
         }
     }
 }
