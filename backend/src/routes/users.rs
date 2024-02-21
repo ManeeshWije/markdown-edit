@@ -1,3 +1,5 @@
+use crate::db::user_queries;
+use crate::models::user::User;
 use axum::extract::State;
 use axum::http::{Response, StatusCode};
 use axum::Json;
@@ -7,9 +9,6 @@ use axum::{
     Router,
 };
 use uuid::Uuid;
-
-use crate::db::user_queries;
-use crate::models::user::User;
 
 pub fn users_routes(pool: sqlx::PgPool) -> Router {
     Router::new()
@@ -24,7 +23,6 @@ async fn get_user_by_uuid(
     State(pool): State<sqlx::PgPool>,
     params: axum::extract::Path<String>,
 ) -> Result<Json<User>, String> {
-    // parse the uuid from the path and if its invalid return a 400
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
         Err(_) => {
@@ -79,7 +77,8 @@ async fn update_user(
     let username = request_body.username;
     let email = request_body.email;
 
-    let user = match user_queries::update_user(&pool, uuid, username.as_str(), email.as_str()).await {
+    let user = match user_queries::update_user(&pool, uuid, username.as_str(), email.as_str()).await
+    {
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
