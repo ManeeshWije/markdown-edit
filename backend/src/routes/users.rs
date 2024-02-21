@@ -8,7 +8,7 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::db::queries;
+use crate::db::user_queries;
 use crate::models::user::User;
 
 pub fn users_routes(pool: sqlx::PgPool) -> Router {
@@ -32,7 +32,7 @@ async fn get_user_by_uuid(
         }
     };
 
-    let user = match queries::fetch_user_by_uuid(&pool, uuid).await {
+    let user = match user_queries::fetch_user_by_uuid(&pool, uuid).await {
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
@@ -52,7 +52,7 @@ async fn create_user(
     let username = request_body.username;
     let email = request_body.email;
 
-    let user = match queries::create_user(
+    let user = match user_queries::create_user(
         &pool,
         uuid,
         username.clone().as_str(),
@@ -79,7 +79,7 @@ async fn update_user(
     let username = request_body.username;
     let email = request_body.email;
 
-    let user = match queries::update_user(&pool, uuid, username.as_str(), email.as_str()).await {
+    let user = match user_queries::update_user(&pool, uuid, username.as_str(), email.as_str()).await {
         Ok(user) => user,
         Err(err) => {
             eprintln!("Database error: {}", err);
@@ -101,7 +101,7 @@ async fn delete_user(
         }
     };
 
-    match queries::delete_user(&pool, uuid).await {
+    match user_queries::delete_user(&pool, uuid).await {
         Ok(_) => Ok(Response::builder()
             .status(StatusCode::OK)
             .body(Body::from("User deleted"))

@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS Users (
 
 CREATE TABLE IF NOT EXISTS Documents (
     uuid uuid PRIMARY KEY,
-    user_uuid uuid REFERENCES Users(uuid),
+    user_uuid uuid,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     created_at VARCHAR(255) DEFAULT CURRENT_TIMESTAMP,
-    updated_at VARCHAR(255) DEFAULT CURRENT_TIMESTAMP
+    updated_at VARCHAR(255) DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT FK_user_document FOREIGN KEY(user_uuid)
+        REFERENCES Users(uuid)
 );

@@ -1,3 +1,4 @@
+use crate::models::document::Document;
 use crate::models::user::User;
 use sqlx::PgPool;
 use uuid::Uuid;
