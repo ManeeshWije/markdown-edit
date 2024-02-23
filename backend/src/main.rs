@@ -1,8 +1,9 @@
 mod db;
 mod models;
 mod routes;
-use axum::Router;
+use axum::{routing::get, Router};
 use dotenv::dotenv;
+use routes::auth::google_auth_router;
 use routes::documents::document_routes;
 use routes::users::users_routes;
 use std::env;
@@ -24,12 +25,18 @@ async fn main() {
         .unwrap();
 
     let app = Router::new()
+        .route("/", get(root))
         .nest("/users", users_routes(pool.clone()))
-        .nest("/documents", document_routes(pool.clone()));
+        .nest("/documents", document_routes(pool.clone()))
+        .nest("/auth", google_auth_router(pool.clone()));
 
     // start the server
     axum::serve(listener, app).await.unwrap_or_else(|err| {
         eprintln!("Server error: {}", err);
         std::process::exit(1);
     })
+}
+
+async fn root() -> &'static str {
+    "Hello, World!"
 }

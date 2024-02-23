@@ -22,7 +22,7 @@ pub async fn fetch_document_by_uuid(
 
     Ok(Document {
         uuid: document.uuid,
-        user_uuid: document.user_uuid.unwrap(),
+        user_uuid: document.user_uuid,
         title: document.title,
         content: document.content,
         created_at: Some(document.created_at.unwrap().to_string()),
@@ -50,7 +50,7 @@ pub async fn fetch_all_documents_for_user(
     for document in documents {
         result.push(Document {
             uuid: document.uuid,
-            user_uuid: document.user_uuid.unwrap(),
+            user_uuid: document.user_uuid,
             title: document.title,
             content: document.content,
             created_at: Some(document.created_at.unwrap().to_string()),
@@ -84,7 +84,7 @@ pub async fn create_document(
 
     Ok(Document {
         uuid: document.uuid,
-        user_uuid: document.user_uuid.unwrap(),
+        user_uuid: document.user_uuid,
         title: document.title,
         content: document.content,
         created_at: Some(document.created_at.unwrap().to_string()),
@@ -116,7 +116,7 @@ pub async fn update_document(
 
     Ok(Document {
         uuid: document.uuid,
-        user_uuid: document.user_uuid.unwrap(),
+        user_uuid: document.user_uuid,
         title: document.title,
         content: document.content,
         created_at: Some(document.created_at.unwrap().to_string()),
@@ -143,7 +143,7 @@ pub async fn delete_document(
 
     Ok(Document {
         uuid: document.uuid,
-        user_uuid: document.user_uuid.unwrap(),
+        user_uuid: document.user_uuid,
         title: document.title,
         content: document.content,
         created_at: Some(document.created_at.unwrap().to_string()),
