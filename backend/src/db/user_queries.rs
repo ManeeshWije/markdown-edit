@@ -54,6 +54,24 @@ pub async fn fetch_user_by_session_uuid(
     Ok(user)
 }
 
+pub async fn fetch_user_session_by_user_uuid(
+    pool: &PgPool,
+    user_uuid: Uuid,
+) -> Result<UserSession, sqlx::Error> {
+    let user_session = sqlx::query_as!(
+        UserSession,
+        "
+        SELECT * FROM UserSessions
+        WHERE user_uuid = $1
+        ",
+        user_uuid
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(user_session)
+}
+
 pub async fn create_user(
     pool: &PgPool,
     uuid: Uuid,

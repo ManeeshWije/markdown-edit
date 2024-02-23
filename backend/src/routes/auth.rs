@@ -21,12 +21,11 @@ pub const COOKIE_AUTH_CSRF_STATE: &str = "auth_csrf_state";
 pub const COOKIE_AUTH_CODE_VERIFIER: &str = "auth_code_verifier";
 pub const SESSION_DURATION: Duration = Duration::from_millis(1000 * 60 * 60 * 24); // 24 hours
 
-#[derive(Default, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
 struct GoogleUser {
     sub: String,
     name: String,
-    email: Option<String>,
-    email_verified: Option<bool>,
+    email: String,
 }
 
 pub fn google_auth_router(pool: sqlx::PgPool) -> Router {
@@ -77,6 +76,9 @@ async fn login() -> Result<impl IntoResponse, StatusCode> {
         .add_scope(Scope::new(
             "https://www.googleapis.com/auth/userinfo.profile".to_string(),
         ))
+        .add_scope(Scope::new(
+            "https://www.googleapis.com/auth/userinfo.email".to_string(),
+        ))
         .set_pkce_challenge(pkce_code_challenge)
         .url();
 
@@ -121,8 +123,6 @@ async fn callback(
     let stored_state = cookies.get(COOKIE_AUTH_CSRF_STATE);
     let stored_code_verifier = cookies.get(COOKIE_AUTH_CODE_VERIFIER);
 
-    println!("state: {}", state);
-
     let (Some(csrf_state), Some(code_verifier)) = (stored_state, stored_code_verifier) else {
         return Ok(StatusCode::BAD_REQUEST.into_response());
     };
@@ -165,9 +165,7 @@ async fn callback(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    // Add user session
-    let account_email = google_user.email.clone().unwrap_or_else(|| "".to_string());
-    println!("account_email: {}", account_email);
+    let account_email = google_user.email.clone().to_string();
     let existing_user = user_queries::fetch_user_by_email(&pool, account_email.as_str())
         .await
         .context("Failed to get user")
@@ -195,12 +193,29 @@ async fn callback(
         }
     };
 
-    let user_session = user_queries::create_user_session(&pool, user.uuid, SESSION_DURATION)
+    // check if the user session exists already and if not create a new one
+    let user_session = user_queries::fetch_user_session_by_user_uuid(&pool, user.uuid)
         .await
+        .context("Failed to get user session")
         .map_err(|err| {
-            eprintln!("Failed to create user session: {}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+            eprintln!("Failed to get user session: {}", err);
+            err
+        });
+
+    let user_session = match user_session {
+        Ok(user_session) => user_session,
+        Err(_) => {
+            let new_user_session =
+                user_queries::create_user_session(&pool, user.uuid, SESSION_DURATION)
+                    .await
+                    .map_err(|err| {
+                        eprintln!("Failed to create user session: {}", err);
+                        StatusCode::INTERNAL_SERVER_ERROR
+                    })?;
+
+            new_user_session
+        }
+    };
 
     // Remove code_verifier and csrf_state cookies
     let mut remove_csrf_cookie = Cookie::new(COOKIE_AUTH_CSRF_STATE, "");
