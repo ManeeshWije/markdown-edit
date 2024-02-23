@@ -1,13 +1,17 @@
-use crate::db::document_queries;
-use crate::db::user_queries;
-use crate::models::document::Document;
 use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::ErrorResponse;
 use axum::Json;
 use axum::{
     routing::{delete, get, post, put},
     Router,
 };
+use axum_extra::extract::cookie::CookieJar;
 use uuid::Uuid;
+
+use crate::db::document_queries;
+use crate::models::document::Document;
+use crate::utils::helpers::check_user_session;
 
 pub fn document_routes(pool: sqlx::PgPool) -> Router {
     Router::new()
@@ -20,29 +24,33 @@ pub fn document_routes(pool: sqlx::PgPool) -> Router {
 }
 
 async fn get_document_by_uuid(
+    cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
     params: axum::extract::Path<String>,
-) -> Result<Json<Document>, String> {
+) -> Result<Json<Document>, ErrorResponse> {
+    // Parse the UUID from the request parameters
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
         Err(_) => {
-            return Err("Invalid UUID".to_string());
+            return Err(ErrorResponse::from(StatusCode::BAD_REQUEST));
         }
     };
 
-    let user_uuid = match user_queries::fetch_user_by_uuid(&pool, uuid).await {
+    // Check if the user is logged in
+    let user_uuid = match check_user_session(cookies, pool.clone()).await {
         Ok(user) => user.uuid,
         Err(err) => {
-            eprintln!("Database error: {}", err);
-            return Err("Failed to fetch user".to_string());
+            eprintln!("Database error: {:?}", err);
+            return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
         }
     };
 
+    // Fetch the document from the database
     let document = match document_queries::fetch_document_by_uuid(&pool, uuid, user_uuid).await {
         Ok(document) => document,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Err("Failed to fetch document".to_string());
+            return Err(ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR));
         }
     };
 
@@ -50,21 +58,24 @@ async fn get_document_by_uuid(
 }
 
 async fn get_all_documents_by_user_uuid(
+    cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
-    params: axum::extract::Path<String>,
-) -> Result<Json<Vec<Document>>, String> {
-    let uuid = match Uuid::parse_str(&params) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return Err("Invalid UUID".to_string());
+) -> Result<Json<Vec<Document>>, ErrorResponse> {
+    // Check if the user is logged in
+    let user_uuid = match check_user_session(cookies, pool.clone()).await {
+        Ok(user) => user.uuid,
+        Err(err) => {
+            eprintln!("Database error: {:?}", err);
+            return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
         }
     };
 
-    let documents = match document_queries::fetch_all_documents_for_user(&pool, uuid).await {
+    // Fetch all documents from the database
+    let documents = match document_queries::fetch_all_documents_for_user(&pool, user_uuid).await {
         Ok(documents) => documents,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Err("Failed to fetch all documents".to_string());
+            return Err(ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR));
         }
     };
 
@@ -72,15 +83,26 @@ async fn get_all_documents_by_user_uuid(
 }
 
 async fn create_document(
+    cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
     request: Json<Document>,
-) -> Result<Json<Document>, String> {
+) -> Result<Json<Document>, ErrorResponse> {
+    // Check if the user is logged in
+    let user_uuid = match check_user_session(cookies, pool.clone()).await {
+        Ok(user) => user.uuid,
+        Err(err) => {
+            eprintln!("Database error: {:?}", err);
+            return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
+        }
+    };
+
+    // Parse the request body
     let request_body = request.0;
     let uuid = request_body.uuid;
     let title = request_body.title;
     let content = request_body.content;
-    let user_uuid = request_body.user_uuid;
 
+    // Create the document in the database
     let document = match document_queries::create_document(
         &pool,
         uuid,
@@ -93,7 +115,7 @@ async fn create_document(
         Ok(document) => document,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Err("Failed to create document".to_string());
+            return Err(ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR));
         }
     };
 
@@ -101,15 +123,26 @@ async fn create_document(
 }
 
 async fn update_document(
+    cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
     request: Json<Document>,
-) -> Result<Json<Document>, String> {
+) -> Result<Json<Document>, ErrorResponse> {
+    // Check if the user is logged in
+    let user_uuid = match check_user_session(cookies, pool.clone()).await {
+        Ok(user) => user.uuid,
+        Err(err) => {
+            eprintln!("Database error: {:?}", err);
+            return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
+        }
+    };
+
+    // Parse the request body
     let request_body = request.0;
     let uuid = request_body.uuid;
     let title = request_body.title;
     let content = request_body.content;
-    let user_uuid = request_body.user_uuid;
 
+    // Update the document in the database
     let document = match document_queries::update_document(
         &pool,
         uuid,
@@ -122,7 +155,7 @@ async fn update_document(
         Ok(document) => document,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Err("Failed to update document".to_string());
+            return Err(ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR));
         }
     };
 
@@ -130,29 +163,33 @@ async fn update_document(
 }
 
 async fn delete_document(
+    cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
     params: axum::extract::Path<String>,
-) -> Result<Json<Document>, String> {
+) -> Result<Json<Document>, ErrorResponse> {
+    // Parse the UUID from the request parameters
     let uuid = match Uuid::parse_str(&params) {
         Ok(uuid) => uuid,
         Err(_) => {
-            return Err("Invalid UUID".to_string());
+            return Err(ErrorResponse::from(StatusCode::BAD_REQUEST));
         }
     };
 
-    let user_uuid = match user_queries::fetch_user_by_uuid(&pool, uuid).await {
+    // Check if the user is logged in
+    let user_uuid = match check_user_session(cookies, pool.clone()).await {
         Ok(user) => user.uuid,
         Err(err) => {
-            eprintln!("Database error: {}", err);
-            return Err("Failed to fetch user".to_string());
+            eprintln!("Database error: {:?}", err);
+            return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
         }
     };
 
+    // Delete the document from the database
     let document = match document_queries::delete_document(&pool, uuid, user_uuid).await {
         Ok(document) => document,
         Err(err) => {
             eprintln!("Database error: {}", err);
-            return Err("Failed to delete document".to_string());
+            return Err(ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR));
         }
     };
 

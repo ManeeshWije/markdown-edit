@@ -1,15 +1,17 @@
-use crate::models::document::Document;
 use sqlx::PgPool;
 use uuid::Uuid;
+
+use crate::models::document::Document;
 
 pub async fn fetch_document_by_uuid(
     pool: &PgPool,
     uuid: Uuid,
     user_uuid: Uuid,
 ) -> Result<Document, sqlx::Error> {
-    let document = sqlx::query!(
+    let document = sqlx::query_as!(
+        Document,
         "
-        SELECT d.uuid, d.user_uuid, d.title, d.content, d.created_at, d.updated_at
+        SELECT d.*
         FROM documents AS d
         LEFT JOIN users AS u ON d.user_uuid = u.uuid
         WHERE d.uuid = $1 AND d.user_uuid = $2
@@ -20,21 +22,15 @@ pub async fn fetch_document_by_uuid(
     .fetch_one(pool)
     .await?;
 
-    Ok(Document {
-        uuid: document.uuid,
-        user_uuid: document.user_uuid,
-        title: document.title,
-        content: document.content,
-        created_at: Some(document.created_at.unwrap().to_string()),
-        updated_at: Some(document.updated_at.unwrap().to_string()),
-    })
+    Ok(document)
 }
 
 pub async fn fetch_all_documents_for_user(
     pool: &PgPool,
     user_uuid: Uuid,
 ) -> Result<Vec<Document>, sqlx::Error> {
-    let documents = sqlx::query!(
+    let documents = sqlx::query_as!(
+        Document,
         "
         SELECT d.uuid, d.user_uuid, d.title, d.content, d.created_at, d.updated_at
         FROM documents AS d
@@ -68,7 +64,8 @@ pub async fn create_document(
     title: &str,
     content: &str,
 ) -> Result<Document, sqlx::Error> {
-    let document = sqlx::query!(
+    let document = sqlx::query_as!(
+        Document,
         "
         INSERT INTO documents (uuid, user_uuid, title, content, created_at, updated_at)
         VALUES ($1, $2, $3, $4, DEFAULT, DEFAULT)
@@ -82,14 +79,7 @@ pub async fn create_document(
     .fetch_one(pool)
     .await?;
 
-    Ok(Document {
-        uuid: document.uuid,
-        user_uuid: document.user_uuid,
-        title: document.title,
-        content: document.content,
-        created_at: Some(document.created_at.unwrap().to_string()),
-        updated_at: Some(document.updated_at.unwrap().to_string()),
-    })
+    Ok(document)
 }
 
 pub async fn update_document(
@@ -99,7 +89,8 @@ pub async fn update_document(
     title: &str,
     content: &str,
 ) -> Result<Document, sqlx::Error> {
-    let document = sqlx::query!(
+    let document = sqlx::query_as!(
+        Document,
         "
         UPDATE documents
         SET title = $1, content = $2, updated_at = DEFAULT
@@ -114,14 +105,7 @@ pub async fn update_document(
     .fetch_one(pool)
     .await?;
 
-    Ok(Document {
-        uuid: document.uuid,
-        user_uuid: document.user_uuid,
-        title: document.title,
-        content: document.content,
-        created_at: Some(document.created_at.unwrap().to_string()),
-        updated_at: Some(document.updated_at.unwrap().to_string()),
-    })
+    Ok(document)
 }
 
 pub async fn delete_document(
@@ -129,7 +113,8 @@ pub async fn delete_document(
     uuid: Uuid,
     user_uuid: Uuid,
 ) -> Result<Document, sqlx::Error> {
-    let document = sqlx::query!(
+    let document = sqlx::query_as!(
+        Document,
         "
         DELETE FROM documents
         WHERE uuid = $1 AND user_uuid = $2
@@ -141,12 +126,5 @@ pub async fn delete_document(
     .fetch_one(pool)
     .await?;
 
-    Ok(Document {
-        uuid: document.uuid,
-        user_uuid: document.user_uuid,
-        title: document.title,
-        content: document.content,
-        created_at: Some(document.created_at.unwrap().to_string()),
-        updated_at: Some(document.updated_at.unwrap().to_string()),
-    })
+    Ok(document)
 }

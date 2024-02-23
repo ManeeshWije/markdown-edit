@@ -1,6 +1,7 @@
 mod db;
 mod models;
 mod routes;
+mod utils;
 use axum::{routing::get, Router};
 use dotenv::dotenv;
 use routes::auth::google_auth_router;
@@ -25,10 +26,10 @@ async fn main() {
         .unwrap();
 
     let app = Router::new()
-        .route("/", get(root))
+        .nest("/auth", google_auth_router(pool.clone()))
         .nest("/users", users_routes(pool.clone()))
         .nest("/documents", document_routes(pool.clone()))
-        .nest("/auth", google_auth_router(pool.clone()));
+        .route("/", get(root));
 
     // start the server
     axum::serve(listener, app).await.unwrap_or_else(|err| {

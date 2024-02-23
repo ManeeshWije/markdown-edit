@@ -12,20 +12,26 @@ use oauth2::{
 };
 use oauth2::{reqwest::async_http_client, PkceCodeVerifier};
 use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
-use std::time::Duration;
 
+use crate::utils::constants::{
+    COOKIE_AUTH_CODE_VERIFIER, COOKIE_AUTH_CSRF_STATE, COOKIE_AUTH_SESSION, SESSION_DURATION,
+};
+use crate::utils::helpers::check_user_session;
 use crate::{db::user_queries, models::user::User};
 
-pub const COOKIE_AUTH_SESSION: &str = "auth_session";
-pub const COOKIE_AUTH_CSRF_STATE: &str = "auth_csrf_state";
-pub const COOKIE_AUTH_CODE_VERIFIER: &str = "auth_code_verifier";
-pub const SESSION_DURATION: Duration = Duration::from_millis(1000 * 60 * 60 * 24); // 24 hours
-
+// What we get back from Google
 #[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
 struct GoogleUser {
     sub: String,
     name: String,
     email: String,
+}
+
+// What we send to Google
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct AuthRequest {
+    code: String,
+    state: String,
 }
 
 pub fn google_auth_router(pool: sqlx::PgPool) -> Router {
@@ -64,11 +70,11 @@ fn get_oauth_client() -> Result<BasicClient, anyhow::Error> {
 }
 
 async fn login() -> Result<impl IntoResponse, StatusCode> {
-    println!("Login");
     let client = get_oauth_client().map_err(|err| {
         eprintln!("Failed to create google auth client: {}", err);
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
+
     let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
 
     let (authorize_url, csrf_state) = client
@@ -105,12 +111,6 @@ async fn login() -> Result<impl IntoResponse, StatusCode> {
     let cookies = CookieJar::new().add(csrf_cookie).add(code_verifier);
 
     Ok((cookies, Redirect::to(authorize_url.as_str())))
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-struct AuthRequest {
-    code: String,
-    state: String,
 }
 
 async fn callback(
@@ -165,6 +165,7 @@ async fn callback(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
+    // Check if the user exists and create a new user if they don't
     let account_email = google_user.email.clone().to_string();
     let existing_user = user_queries::fetch_user_by_email(&pool, account_email.as_str())
         .await
@@ -193,7 +194,7 @@ async fn callback(
         }
     };
 
-    // check if the user session exists already and if not create a new one
+    // check if the user session exists already and is valid. if not create a new one
     let user_session = user_queries::fetch_user_session_by_user_uuid(&pool, user.uuid)
         .await
         .context("Failed to get user session")
@@ -249,18 +250,7 @@ pub async fn me(
     cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
 ) -> Result<Json<User>, ErrorResponse> {
-    let session_cookie = cookies.get(COOKIE_AUTH_SESSION);
-
-    let Some(session_cookie) = session_cookie else {
-        return Err(ErrorResponse::from(StatusCode::UNAUTHORIZED));
-    };
-
-    let user = user_queries::fetch_user_by_session_uuid(
-        &pool,
-        uuid::Uuid::parse_str(session_cookie.value()).unwrap(),
-    )
-    .await
-    .map_err(|_| ErrorResponse::from(StatusCode::INTERNAL_SERVER_ERROR))?;
+    let user = check_user_session(cookies, pool.clone()).await?;
 
     Ok(Json(user))
 }
