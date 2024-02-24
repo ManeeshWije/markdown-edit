@@ -8,6 +8,8 @@ use routes::auth::google_auth_router;
 use routes::documents::document_routes;
 use routes::users::users_routes;
 use std::env;
+use std::time::Duration;
+use tokio::time;
 
 #[tokio::main]
 async fn main() {
@@ -25,6 +27,9 @@ async fn main() {
         .await
         .unwrap();
 
+    // spawn a task to delete expired sessions periodically
+    tokio::spawn(delete_expired_sessions_periodically(pool.clone()));
+
     let app = Router::new()
         .nest("/auth", google_auth_router(pool.clone()))
         .nest("/users", users_routes(pool.clone()))
@@ -40,4 +45,17 @@ async fn main() {
 
 async fn root() -> &'static str {
     "Hello, World!"
+}
+
+async fn delete_expired_sessions_periodically(pool: sqlx::PgPool) {
+    // Run indefinitely
+    loop {
+        // Wait for 1 hour before deleting expired sessions again
+        time::sleep(Duration::from_secs(3600)).await;
+
+        // Delete expired sessions
+        if let Err(err) = db::user_queries::delete_expired_sessions(&pool).await {
+            eprintln!("Error deleting expired sessions: {}", err);
+        }
+    }
 }

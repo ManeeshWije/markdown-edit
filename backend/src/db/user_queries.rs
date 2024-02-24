@@ -159,3 +159,20 @@ pub async fn delete_user_session(pool: &PgPool, session_uuid: Uuid) -> Result<()
 
     Ok(())
 }
+
+pub async fn delete_expired_sessions(pool: &PgPool) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "
+        DELETE FROM UserSessions
+        WHERE expires_at < $1
+        ",
+        chrono::offset::Utc::now()
+            .naive_utc()
+            .timestamp()
+            .to_string()
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
