@@ -34,22 +34,7 @@ export default function Home({ userData }: { userData: User | null }) {
             )}
             <div>
                 <Typography variant="h1" className="mt-16 p-4">
-                    <ReactTyped
-                        backSpeed={50}
-                        onBegin={function noRefCheck() {}}
-                        onComplete={function noRefCheck() {}}
-                        onDestroy={function noRefCheck() {}}
-                        onLastStringBackspaced={function noRefCheck() {}}
-                        onReset={function noRefCheck() {}}
-                        onStart={function noRefCheck() {}}
-                        onStop={function noRefCheck() {}}
-                        onStringTyped={function noRefCheck() {}}
-                        onTypingPaused={function noRefCheck() {}}
-                        onTypingResumed={function noRefCheck() {}}
-                        strings={["Markdown Edit"]}
-                        typeSpeed={100}
-                        typedRef={function noRefCheck() {}}
-                    />
+                    <ReactTyped backSpeed={50} strings={["Markdown Edit"]} typeSpeed={100} />
                 </Typography>
 
                 {userData ? (
