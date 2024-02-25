@@ -1,10 +1,12 @@
+use std::env;
+
 use anyhow::Context;
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::{ErrorResponse, IntoResponse, Redirect},
     routing::get,
-    Json, Router,
+    Router,
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use oauth2::{
@@ -13,11 +15,10 @@ use oauth2::{
 use oauth2::{reqwest::async_http_client, PkceCodeVerifier};
 use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 
+use crate::db::user_queries;
 use crate::utils::constants::{
     COOKIE_AUTH_CODE_VERIFIER, COOKIE_AUTH_CSRF_STATE, COOKIE_AUTH_SESSION, SESSION_DURATION,
 };
-use crate::utils::helpers::check_user_session;
-use crate::{db::user_queries, models::user::User};
 
 // What we get back from Google
 #[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
@@ -36,7 +37,6 @@ struct AuthRequest {
 
 pub fn google_auth_router(pool: sqlx::PgPool) -> Router {
     Router::new()
-        .route("/me", get(me))
         .route("/logout", get(logout))
         .route("/google/login", get(login))
         .route("/google/callback", get(callback))
@@ -117,24 +117,25 @@ async fn callback(
     cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
     Query(query): Query<AuthRequest>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> Result<impl IntoResponse, ErrorResponse> {
     let code = query.code;
     let state = query.state;
     let stored_state = cookies.get(COOKIE_AUTH_CSRF_STATE);
     let stored_code_verifier = cookies.get(COOKIE_AUTH_CODE_VERIFIER);
 
     let (Some(csrf_state), Some(code_verifier)) = (stored_state, stored_code_verifier) else {
-        return Ok(StatusCode::BAD_REQUEST.into_response());
+        return Err(ErrorResponse::from(StatusCode::BAD_REQUEST));
     };
 
     if csrf_state.value() != state {
-        return Ok(StatusCode::BAD_REQUEST.into_response());
+        return Err(ErrorResponse::from(StatusCode::BAD_REQUEST));
     }
 
     let client = get_oauth_client().map_err(|err| {
         eprintln!("Failed to create google auth client: {}", err);
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
+
     let code = AuthorizationCode::new(code);
     let pkce_code_verifier = PkceCodeVerifier::new(code_verifier.value().to_owned());
 
@@ -242,17 +243,10 @@ async fn callback(
         .add(remove_code_verifier)
         .add(session_cookie);
 
-    let response = (cookies, Redirect::to("/")).into_response();
-    Ok(response)
-}
-
-pub async fn me(
-    cookies: CookieJar,
-    State(pool): State<sqlx::PgPool>,
-) -> Result<Json<User>, ErrorResponse> {
-    let user = check_user_session(cookies, pool.clone()).await?;
-
-    Ok(Json(user))
+    Ok((
+        cookies,
+        Redirect::to(env::var("CLIENT_URL").unwrap().as_str()).into_response(),
+    ))
 }
 
 pub async fn logout(
@@ -277,5 +271,9 @@ pub async fn logout(
     remove_session_cookie.make_removal();
 
     cookies = cookies.add(remove_session_cookie);
-    Ok((cookies, Redirect::to("/")))
+
+    Ok((
+        cookies,
+        Redirect::to(env::var("CLIENT_URL").unwrap().as_str()).into_response(),
+    ))
 }

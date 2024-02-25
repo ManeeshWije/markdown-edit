@@ -4,12 +4,14 @@ mod routes;
 mod utils;
 use axum::{routing::get, Router};
 use dotenv::dotenv;
+use http::{HeaderValue, Method};
 use routes::auth::google_auth_router;
 use routes::documents::document_routes;
 use routes::users::users_routes;
 use std::env;
 use std::time::Duration;
 use tokio::time;
+use tower_http::cors::CorsLayer;
 
 #[tokio::main]
 async fn main() {
@@ -30,11 +32,25 @@ async fn main() {
     // spawn a task to delete expired sessions periodically
     tokio::spawn(delete_expired_sessions_periodically(pool.clone()));
 
+    let cors_origin = env::var("CLIENT_URL")
+        .unwrap()
+        .as_str()
+        .parse::<HeaderValue>()
+        .unwrap();
+    let cors_middleware = CorsLayer::new()
+        .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::PUT])
+        .allow_origin(cors_origin)
+        .allow_credentials(true);
+
+    let auth_router = google_auth_router(pool.clone()).layer(cors_middleware.clone());
+    let users_router = users_routes(pool.clone()).layer(cors_middleware.clone());
+    let documents_router = document_routes(pool.clone()).layer(cors_middleware.clone());
+
     let app = Router::new()
-        .nest("/auth", google_auth_router(pool.clone()))
-        .nest("/users", users_routes(pool.clone()))
-        .nest("/documents", document_routes(pool.clone()))
-        .route("/", get(root));
+        .nest("/auth", auth_router)
+        .nest("/users", users_router)
+        .nest("/documents", documents_router)
+        .route("/", get(root).layer(cors_middleware.clone()));
 
     // start the server
     axum::serve(listener, app).await.unwrap_or_else(|err| {

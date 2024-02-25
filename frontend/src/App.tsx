@@ -1,69 +1,54 @@
-import { useState } from "react";
-import CodeMirror from "@uiw/react-codemirror";
-import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { languages } from "@codemirror/language-data";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import Tools from "./components/Tools";
-import "./input.css";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
+import Editor from "./pages/Editor";
+import React, { useState, useEffect } from "react";
+import { DefaultSpinner } from "./components/DefaultSpinner";
 
-export default function App() {
-    const [markdownContent, setMarkdownContent] = useState("");
-    const [showPreview, setShowPreview] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
-
-    const handleCodeMirrorChange = (value: string) => {
-        setMarkdownContent(value);
-        localStorage.setItem("markdownContent", value);
-    };
-
-    const togglePreview = () => {
-        setShowPreview(!showPreview);
-    };
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-        document.body.classList.toggle("dark-mode");
-    };
-
-    return (
-        <div>
-            <Tools
-                onTogglePreview={togglePreview}
-                onToggleDarkMode={toggleDarkMode}
-                darkMode={darkMode}
-            />
-            <div
-                className={`editor-container ${
-                    showPreview ? "preview-visible" : ""
-                }`}
-            >
-                <CodeMirror
-                    value={
-                        localStorage.getItem("markdownContent") ||
-                        markdownContent
-                    }
-                    autoFocus
-                    onChange={handleCodeMirrorChange}
-                    extensions={[
-                        markdown({
-                            base: markdownLanguage,
-                            codeLanguages: languages,
-                        }),
-                    ]}
-                    className="flex-1"
-                    theme={darkMode ? githubDark : githubLight}
-                />
-                {showPreview && (
-                    <div className="preview markdown">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {localStorage.getItem("markdownContent") ||
-                                markdownContent}
-                        </ReactMarkdown>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+export interface User {
+    uuid: string;
+    username: string;
+    email: string;
+    created_at: string;
+    updated_at: string;
 }
+
+const App: React.FC = () => {
+    const [userData, setUserData] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            try {
+                const response = await fetch(import.meta.env.VITE_SERVER_URL + "/users/me", {
+                    method: "GET",
+                    credentials: "include"
+                });
+                const data: User = await response.json();
+                setUserData(data);
+            } catch (_) {
+                console.warn("You are not authenticated!");
+            } finally {
+                setLoading(false); // Set loading to false regardless of success or failure
+            }
+        };
+
+        checkAuthentication();
+    }, []);
+
+    // Render a loading indicator while user data is being fetched
+    if (loading) {
+        return <DefaultSpinner />;
+    }
+
+    // Render the app once user data is fetched
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home userData={userData} />} />
+                <Route path="/editor" element={userData ? <Editor /> : <Navigate to="/" />} />
+            </Routes>
+        </Router>
+    );
+};
+
+export default App;
