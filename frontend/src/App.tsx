@@ -4,6 +4,7 @@ import Editor from "./pages/Editor";
 import ErrorPage from "./pages/ErrorPage";
 import React, { useState, useEffect } from "react";
 import { DefaultSpinner } from "./components/DefaultSpinner";
+import "./input.css";
 
 export interface User {
     uuid: string;

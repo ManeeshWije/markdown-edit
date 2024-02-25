@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+#home {
+    background-color: #a3d3ff;
+    background: linear-gradient(to right, #a3d3ff, #ffffff);
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -26,7 +31,7 @@ body {
     padding-left: 10px;
 }
 
-.markdown > * {
+.markdown>* {
     all: revert;
 }
 
