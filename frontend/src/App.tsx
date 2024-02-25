@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Editor from "./pages/Editor";
+import ErrorPage from "./pages/ErrorPage";
 import React, { useState, useEffect } from "react";
 import { DefaultSpinner } from "./components/DefaultSpinner";
 
@@ -28,24 +29,23 @@ const App: React.FC = () => {
             } catch (_) {
                 console.warn("You are not authenticated!");
             } finally {
-                setLoading(false); // Set loading to false regardless of success or failure
+                setLoading(false);
             }
         };
 
         checkAuthentication();
     }, []);
 
-    // Render a loading indicator while user data is being fetched
     if (loading) {
         return <DefaultSpinner />;
     }
 
-    // Render the app once user data is fetched
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Home userData={userData} />} />
                 <Route path="/editor" element={userData ? <Editor /> : <Navigate to="/" />} />
+                <Route path="*" element={<ErrorPage />} />
             </Routes>
         </Router>
     );
