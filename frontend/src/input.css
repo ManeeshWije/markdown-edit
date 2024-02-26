@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-#home {
-    background-color: #a3d3ff;
-    background: linear-gradient(to right, #a3d3ff, #ffffff);
+* {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0;
     padding: 0;
+    background-color: #a3d3ff;
+    background: linear-gradient(to right, #a3d3ff, #ffffff);
 }
 
 .editor-container {
@@ -31,11 +32,11 @@ body {
     padding-left: 10px;
 }
 
-.markdown>* {
+.markdown > * {
     all: revert;
 }
 
 .dark-mode {
-    background-color: rgb(12, 12, 23);
+    background: linear-gradient(to right, #0c0c17, #171732);
     color: white;
 }

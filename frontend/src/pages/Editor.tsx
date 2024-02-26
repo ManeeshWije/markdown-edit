@@ -7,11 +7,18 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Tools from "../components/Tools";
 import "../input.css";
+import React from "react";
 
 export default function Editor() {
     const [markdownContent, setMarkdownContent] = useState("");
     const [showPreview, setShowPreview] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+
+    React.useEffect(() => {
+        const isDarkMode = localStorage.getItem("darkMode") === "true";
+        setDarkMode(isDarkMode);
+        document.body.classList.toggle("dark-mode", isDarkMode);
+    }, []);
 
     const handleCodeMirrorChange = (value: string) => {
         setMarkdownContent(value);
@@ -22,8 +29,10 @@ export default function Editor() {
     };
 
     const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-        document.body.classList.toggle("dark-mode");
+        const newDarkMode = !darkMode;
+        setDarkMode(newDarkMode);
+        document.body.classList.toggle("dark-mode", newDarkMode);
+        localStorage.setItem("darkMode", JSON.stringify(newDarkMode));
     };
 
     return (

@@ -9,7 +9,10 @@ export default function Footer() {
         <footer className="flex w-full flex-col flex-wrap items-center justify-center gap-y-6 gap-x-12 py-6 text-center md:justify-between">
             <ul className="flex flex-col flex-wrap items-center gap-y-2 gap-x-8">
                 <li>
-                    <Typography color="blue-gray" className="font-normal">
+                    <Typography
+                        color="blue-gray"
+                        className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
+                    >
                         &copy; {getYear()} Markdown Edit
                     </Typography>
                 </li>
