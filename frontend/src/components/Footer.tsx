@@ -10,6 +10,7 @@ export default function Footer() {
             <ul className="flex flex-col flex-wrap items-center gap-y-2 gap-x-8">
                 <li>
                     <Typography
+                        placeholder="Markdown Edit"
                         color="blue-gray"
                         className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
                     >
@@ -18,6 +19,7 @@ export default function Footer() {
                 </li>
                 <li>
                     <Typography
+                        placeholder="Made with ❤️ by Maneesh"
                         color="blue-gray"
                         className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
                     >
