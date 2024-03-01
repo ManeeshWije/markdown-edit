@@ -6,6 +6,7 @@ import { languages } from "@codemirror/language-data";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Tools from "../components/Tools";
+import { Document, getDocuments } from "../utils";
 import "../input.css";
 
 export default function Editor() {
@@ -14,13 +15,24 @@ export default function Editor() {
     const [darkMode, setDarkMode] = React.useState(false);
 
     React.useEffect(() => {
+        const fetchDocumentContent = async () => {
+            await getDocumentContent();
+        };
         const isDarkMode = localStorage.getItem("darkMode") === "true";
         setDarkMode(isDarkMode);
         document.body.classList.toggle("dark-mode", isDarkMode);
+        fetchDocumentContent();
     }, []);
 
     const handleCodeMirrorChange = (value: string) => {
         setMarkdownContent(value);
+    };
+
+    const getDocumentContent = async () => {
+        const documents: Document[] = await getDocuments();
+        if (documents.length > 0) {
+            setMarkdownContent(documents[0].content);
+        }
     };
 
     const togglePreview = () => {
@@ -34,9 +46,13 @@ export default function Editor() {
         localStorage.setItem("darkMode", JSON.stringify(newDarkMode));
     };
 
+    const updateEditorContent = (content: string) => {
+        setMarkdownContent(content);
+    };
+
     return (
         <div>
-            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} onDocumentClick={updateEditorContent} />
             <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
                 <CodeMirror
                     value={markdownContent}

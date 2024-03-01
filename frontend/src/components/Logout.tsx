@@ -6,7 +6,7 @@ export default function Logout() {
     return (
         <div>
             <a href={authUrl}>
-                <Button placeholder="Logout" color="gray" ripple>
+                <Button variant="gradient" size="sm" className="lg:inline-block" placeholder="Logout" color="gray" ripple>
                     Logout
                 </Button>
             </a>

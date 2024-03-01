@@ -42,3 +42,17 @@ export async function getDocuments(): Promise<Document[]> {
         return [];
     }
 }
+
+export async function getDocument(uuid: string): Promise<Document> {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/${uuid}`, {
+            method: "GET",
+            credentials: "include"
+        });
+        const data: Document = await response.json();
+        return data;
+    } catch (error) {
+        console.warn("Error fetching document: ", error);
+        return {} as Document;
+    }
+}
