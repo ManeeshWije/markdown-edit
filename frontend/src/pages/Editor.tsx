@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
@@ -7,12 +7,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Tools from "../components/Tools";
 import "../input.css";
-import React from "react";
 
 export default function Editor() {
-    const [markdownContent, setMarkdownContent] = useState("");
-    const [showPreview, setShowPreview] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
+    const [markdownContent, setMarkdownContent] = React.useState("");
+    const [showPreview, setShowPreview] = React.useState(false);
+    const [darkMode, setDarkMode] = React.useState(false);
 
     React.useEffect(() => {
         const isDarkMode = localStorage.getItem("darkMode") === "true";
