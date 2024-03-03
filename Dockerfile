@@ -8,7 +8,7 @@ RUN npm install
 
 COPY frontend .
 
-RUN npm build
+RUN npm run build
 
 FROM rust:latest AS backend-builder
 
@@ -16,6 +16,7 @@ WORKDIR /app/backend
 
 COPY backend/Cargo.toml backend/Cargo.lock ./
 
+# Create a dummy project to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 
 RUN cargo build --release
