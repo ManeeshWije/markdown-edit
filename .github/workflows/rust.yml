@@ -20,7 +20,7 @@ jobs:
 
     - name: Install SQLx CLI
       run: |
-        cargo install sqlx-cli --features postgres,tls-native-tls,runtime-tokio,uuid,migrate,time
+        cargo install sqlx-cli --no-default-features --features postgres,tls-native-tls,runtime-tokio,uuid,migrate,time
 
     - name: Run Database Migrations
       env:
