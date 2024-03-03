@@ -25,7 +25,11 @@ jobs:
     - name: Run Database Migrations
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: cd backend && sqlx migrate run
+      run: |
+        cd backend
+        echo "Running migrations..."
+        sqlx migrate run
+        echo "Migrations completed successfully."
 
     - name: Build
       run: |
