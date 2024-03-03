@@ -23,6 +23,10 @@ RUN cargo build --release
 
 COPY backend .
 
+RUN cargo install sqlx-cli --no-default-features --features postgres
+RUN sqlx database create
+RUN sqlx migrate run
+
 RUN cargo build --release
 
 FROM debian:buster-slim
