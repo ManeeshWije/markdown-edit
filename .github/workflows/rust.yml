@@ -16,7 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: actions-rs/toolchain@v1
     - name: Build
-      run: cd backend && cargo build --verbose
+      run: cd backend && cargo install sqlx-cli --features postgres,tls-native-tls,runtime-tokio,uuid,migrate,time && sqlx migrate run && cargo build --verbose
     - name: Run tests
       run: cd backend && cargo test --verbose
