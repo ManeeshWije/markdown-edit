@@ -32,11 +32,23 @@ jobs:
         echo "Migrations completed successfully."
 
     - name: Build
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        BASE_URL: ${{ secrets.BASE_URL }}
+        CLIENT_URL: ${{ secrets.CLIENT_URL }}
       run: |
         cd backend
         cargo build --verbose
 
     - name: Run tests
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        BASE_URL: ${{ secrets.BASE_URL }}
+        CLIENT_URL: ${{ secrets.CLIENT_URL }}
       run: |
         cd backend
         cargo test --verbose
