@@ -22,7 +22,7 @@ jobs:
         BASE_URL: ${{ secrets.BASE_URL }}
         CLIENT_URL: ${{ secrets.CLIENT_URL }}
       run: docker build . --file Dockerfile --tag maneeshwije/markdown-edit-image:$(date +%s)
-
+      
     - name: Log in to DockerHub
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
