@@ -1232,10 +1232,6 @@ video {
   max-width: 1320px;
 }
 
-.flex-1 {
-  flex: 1 1 0%;
-}
-
 .flex-none {
   flex: none;
 }
@@ -3355,25 +3351,6 @@ body {
   background: linear-gradient(to right, #a3d3ff, #ffffff);
 }
 
-.editor-container {
-  display: flex;
-  align-items: stretch;
-}
-
-.preview-visible .editor-container {
-  flex-direction: row;
-}
-
-.preview-visible .CodeMirror {
-  flex: 1;
-}
-
-.preview-visible .preview {
-  width: 50%;
-  border-left: 1px solid #ccc;
-  padding-left: 10px;
-}
-
 .markdown > * {
   all: revert;
 }
@@ -3381,6 +3358,31 @@ body {
 .dark-mode {
   background: linear-gradient(to right, #0c0c17, #171732);
   color: white;
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+.editor-column {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.preview-column {
+  flex: 1;
+  overflow-y: auto;
+  display: none;
+}
+
+.preview-visible .preview-column {
+  display: block;
 }
 
 .placeholder\:opacity-0::-moz-placeholder {

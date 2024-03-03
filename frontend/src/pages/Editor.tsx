@@ -51,27 +51,30 @@ export default function Editor() {
     };
 
     return (
-        <div>
+        <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
             <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} onDocumentClick={updateEditorContent} />
-            <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
-                <CodeMirror
-                    value={markdownContent}
-                    autoFocus
-                    onChange={handleCodeMirrorChange}
-                    extensions={[
-                        markdown({
-                            base: markdownLanguage,
-                            codeLanguages: languages
-                        })
-                    ]}
-                    className="flex-1"
-                    theme={darkMode ? githubDark : githubLight}
-                />
-                {showPreview && (
-                    <div className="preview markdown">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown>
-                    </div>
-                )}
+            <div className="editor-wrapper">
+                <div className="editor-column">
+                    <CodeMirror
+                        value={markdownContent}
+                        autoFocus
+                        onChange={handleCodeMirrorChange}
+                        extensions={[
+                            markdown({
+                                base: markdownLanguage,
+                                codeLanguages: languages
+                            })
+                        ]}
+                        theme={darkMode ? githubDark : githubLight}
+                    />
+                </div>
+                <div className={`preview-column ${showPreview ? "preview-visible" : ""}`}>
+                    {showPreview && (
+                        <div className="preview markdown">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
