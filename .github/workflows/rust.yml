@@ -20,7 +20,7 @@ jobs:
 
     - name: Install SQLx CLI
       run: |
-        cargo install sqlx-cli --features postgres
+        cargo install sqlx-cli --no-default-features --features native-tls,postgres
 
     - name: Run Database Migrations
       env:
