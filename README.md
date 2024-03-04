@@ -14,4 +14,4 @@
 - Backend: Rust, Axum, Tokio, SQLx
 - Database: PostgreSQL
 - Authentication: Google OAuth2
-- Hosting: Vercel, Railway
+- Hosting: Docker, Railway
