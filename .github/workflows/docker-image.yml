@@ -16,7 +16,7 @@ jobs:
       - name: Build and push frontend
         working-directory: frontend
         run: |
-          docker build . --file Dockerfile --tag maneeshwije/markdown-edit-frontend .
+          docker build . --file Dockerfile --tag maneeshwije/markdown-edit-frontend
           echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker push maneeshwije/markdown-edit-frontend
 
@@ -30,6 +30,6 @@ jobs:
           CLIENT_URL: ${{ secrets.CLIENT_URL }}
         working-directory: backend
         run: |
-          docker build . --file Dockerfile --tag maneeshwije/markdown-edit-backend .
+          docker build . --file Dockerfile --tag maneeshwije/markdown-edit-backend
           echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker push maneeshwije/markdown-edit-backend
