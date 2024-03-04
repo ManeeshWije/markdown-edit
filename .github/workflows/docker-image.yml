@@ -28,11 +28,7 @@ jobs:
     - name: Build frontend Docker image
       working-directory: ./frontend
       env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        BASE_URL: ${{ secrets.BASE_URL }}
-        CLIENT_URL: ${{ secrets.CLIENT_URL }}
+        VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
       run: docker build . --file Dockerfile --tag maneeshwije/markdown-edit-frontend
       
     - name: Log in to DockerHub

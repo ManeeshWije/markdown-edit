@@ -1,5 +1,7 @@
 FROM node:18-alpine
 
+ARG VITE_SERVER_URL
+
 WORKDIR /app
 
 COPY package.json .
