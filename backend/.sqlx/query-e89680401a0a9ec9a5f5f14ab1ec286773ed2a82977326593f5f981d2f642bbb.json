@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM UserSessions\n        WHERE expires_at < $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e89680401a0a9ec9a5f5f14ab1ec286773ed2a82977326593f5f981d2f642bbb"
+}
