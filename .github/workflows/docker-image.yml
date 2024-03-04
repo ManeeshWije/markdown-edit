@@ -1,34 +1,42 @@
-name: Docker Build and Push
+name: Docker Build And Push
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-and-push:
+
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - name: Build backend Docker image
+      working-directory: ./backend
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        BASE_URL: ${{ secrets.BASE_URL }}
+        CLIENT_URL: ${{ secrets.CLIENT_URL }}
+      run: docker build . --file Dockerfile --tag maneeshwije/markdown-edit-backend
+    
+    - uses: actions/checkout@v3
+    - name: Build frontend Docker image
+      working-directory: ./frontend
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        BASE_URL: ${{ secrets.BASE_URL }}
+        CLIENT_URL: ${{ secrets.CLIENT_URL }}
+      run: docker build . --file Dockerfile --tag maneeshwije/markdown-edit-frontend
+      
+    - name: Log in to DockerHub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build and push frontend
-        working-directory: frontend
-        run: |
-          docker build -t maneeshwije/markdown-edit-frontend .
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push maneeshwije/markdown-edit-frontend
-
-      - name: Build and push backend
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          BASE_URL: ${{ secrets.BASE_URL }}
-          CLIENT_URL: ${{ secrets.CLIENT_URL }}
-        working-directory: backend
-        run: |
-          docker build -t maneeshwije/markdown-edit-backend .
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          docker push maneeshwije/markdown-edit-backend
+    - name: Push Docker images to DockerHub
+      run: docker push maneeshwije/markdown-edit-backend && docker push maneeshwije/markdown-edit-frontend
