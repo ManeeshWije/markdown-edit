@@ -24,10 +24,8 @@ async fn main() {
             std::process::exit(1);
         });
 
-    // bind the server to the address
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .unwrap();
+    // bind the server to the address and port
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
 
     // spawn a task to delete expired sessions periodically
     tokio::spawn(delete_expired_sessions_periodically(pool.clone()));

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    env_file:
+      - backend/.env
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    env_file:
+      - frontend/.env
+    ports:
+      - "3000:3000"
+
+  db:
+    image: postgres
+    env_file:
+      - backend/.env
+    ports:
+      - "3306:3306"
