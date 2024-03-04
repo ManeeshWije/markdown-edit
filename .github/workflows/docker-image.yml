@@ -21,6 +21,12 @@ jobs:
           docker push maneeshwije/markdown-edit-frontend
 
       - name: Build and push backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          BASE_URL: ${{ secrets.BASE_URL }}
+          CLIENT_URL: ${{ secrets.CLIENT_URL }}
         working-directory: backend
         run: |
           docker build -t maneeshwije/markdown-edit-backend .
