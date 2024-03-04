@@ -1,4 +1,4 @@
-FROM node:latest as build
+FROM node:latest
 
 ARG VITE_SERVER_URL
 
@@ -6,14 +6,14 @@ WORKDIR /app
 
 COPY package.json .
 
-RUN npm i
+RUN npm install
 
 COPY . .
 
 RUN npm run build
 
-FROM nginx
+COPY . .
 
-COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+EXPOSE 3000
 
-COPY --from=build /app/dist /usr/share/nginx/html
+ENTRYPOINT ["npm", "run", "preview"]
