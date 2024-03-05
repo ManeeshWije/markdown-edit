@@ -2,26 +2,34 @@ version: '3.8'
 
 services:
   backend:
-    build:
-      context: backend
-      dockerfile: Dockerfile
     env_file:
-      - backend/.env
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - DATABASE_URL=$DATABASE_URL
+        - GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+        - GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+        - BASE_URL=$BASE_URL
+        - CLIENT_URL=$CLIENT_URL
     ports:
       - "3001:3001"
 
   frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
     env_file:
-      - frontend/.env
+      - ./frontend/.env
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_SERVER_URL=$VITE_SERVER_URL
     ports:
       - "3000:3000"
 
   db:
     image: postgres
     env_file:
-      - backend/.env
+      - ./backend/.env
     ports:
       - "3306:3306"
