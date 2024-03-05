@@ -63,3 +63,6 @@ TEST-results.xml
 *v8.log
 /lib/
 .env
+dist/assets/
+dist/index.html
+package-lock.json
