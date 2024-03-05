@@ -17,7 +17,7 @@ export interface Document {
 
 export async function checkAuthentication(): Promise<User | null> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/users/me`, {
+        const response = await fetch(`${process.env.VITE_SERVER_URL}/users/me`, {
             method: "GET",
             credentials: "include"
         });
@@ -31,7 +31,7 @@ export async function checkAuthentication(): Promise<User | null> {
 
 export async function getDocuments(): Promise<Document[]> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/all`, {
+        const response = await fetch(`${process.env.VITE_SERVER_URL}/documents/all`, {
             method: "GET",
             credentials: "include"
         });
@@ -45,7 +45,7 @@ export async function getDocuments(): Promise<Document[]> {
 
 export async function getDocument(uuid: string): Promise<Document> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/${uuid}`, {
+        const response = await fetch(`${process.env.VITE_SERVER_URL}/documents/${uuid}`, {
             method: "GET",
             credentials: "include"
         });
