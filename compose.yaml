@@ -2,8 +2,6 @@ version: '3.8'
 
 services:
   backend:
-    env_file:
-      - ./backend/.env
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -17,8 +15,6 @@ services:
       - "3001:3001"
 
   frontend:
-    env_file:
-      - ./frontend/.env
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -29,7 +25,5 @@ services:
 
   db:
     image: postgres
-    env_file:
-      - ./backend/.env
     ports:
       - "3306:3306"
