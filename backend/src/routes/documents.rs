@@ -98,9 +98,9 @@ async fn create_document(
 
     // Parse the request body
     let request_body = request.0;
-    let uuid = request_body.uuid;
     let title = request_body.title;
     let content = request_body.content;
+    let uuid = request_body.uuid;
 
     // Create the document in the database
     let document = match document_queries::create_document(

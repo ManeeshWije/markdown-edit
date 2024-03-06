@@ -5,6 +5,7 @@ mod utils;
 use axum::{routing::get, Router};
 use dotenv::dotenv;
 use http::{HeaderValue, Method};
+use http::header::CONTENT_TYPE;
 use routes::auth::google_auth_router;
 use routes::documents::document_routes;
 use routes::users::users_routes;
@@ -38,6 +39,7 @@ async fn main() {
     let cors_middleware = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::PUT])
         .allow_origin(cors_origin)
+        .allow_headers([CONTENT_TYPE])
         .allow_credentials(true);
 
     let auth_router = google_auth_router(pool.clone()).layer(cors_middleware.clone());

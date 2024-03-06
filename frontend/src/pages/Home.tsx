@@ -21,6 +21,10 @@ export default function Home({ userData }: { userData: User | null }) {
     const isDarkMode = localStorage.getItem("darkMode") === "true";
     document.body.classList.toggle("dark-mode", isDarkMode);
 
+    if (userData) {
+        localStorage.setItem("user_uuid", userData.uuid);
+    }
+
     return (
         <div className="flex flex-col justify-center items-center h-screen text-center p-4 relative" id="home">
             {userData && (

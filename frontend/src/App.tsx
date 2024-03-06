@@ -14,6 +14,7 @@ const App: React.FC = () => {
     useEffect(() => {
         checkAuthentication().then((data) => {
             setUserData(data);
+            localStorage.setItem("user_uuid", data?.uuid || "");
             setLoading(false);
         });
     }, []);

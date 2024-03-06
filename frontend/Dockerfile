@@ -18,4 +18,4 @@ COPY . .
 
 EXPOSE 3000
 
-ENTRYPOINT ["npm", "run", "preview"]
+CMD ["npm", "run", "preview"]
