@@ -1111,16 +1111,16 @@ video {
   width: 1rem;
 }
 
-.w-40 {
-  width: 10rem;
-}
-
 .w-5 {
   width: 1.25rem;
 }
 
 .w-6 {
   width: 1.5rem;
+}
+
+.w-60 {
+  width: 15rem;
 }
 
 .w-7 {
