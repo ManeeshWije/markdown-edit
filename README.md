@@ -19,7 +19,7 @@ docker-compose --env-file ./backend/.env --env-file ./frontend/.env up --build
 
 - Frontend: `http://localhost:3000`
   - The frontend will hot reload on code changes
-- Backend: `http://localhost:3001
+- Backend: `http://localhost:3001`
   - The backend will need to be restarted on code changes
   - You can Ctrl+C and then run the `docker-compose` command again
 
