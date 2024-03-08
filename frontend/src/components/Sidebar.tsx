@@ -1,13 +1,30 @@
 import React from "react";
-import { IconButton, List, ListItem, ListItemPrefix, Input, Drawer, Card, ListItemSuffix, Alert } from "@material-tailwind/react";
+import {
+    IconButton,
+    List,
+    ListItem,
+    ListItemPrefix,
+    Input,
+    Drawer,
+    Card,
+    ListItemSuffix,
+    Alert,
+    Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+    Button
+} from "@material-tailwind/react";
 import { DocumentIcon, DocumentPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { getDocuments, deleteDocument, createDocument, Document } from "../utils";
+import { getDocuments, deleteDocument, Document, createDocument } from "../utils";
 
 export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content: string) => void }) {
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
     const [documents, setDocuments] = React.useState<Document[]>([]);
     const [showAlert, setShowAlert] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [newDoc, setNewDoc] = React.useState("");
 
     React.useEffect(() => {
         const fetchDocuments = async () => {
@@ -52,16 +69,29 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         setShowAlert(true);
     };
 
-    const handleCreate = async () => {
-        const newDoc = await createDocument("Untitled");
+    const handleCreate = async (title: string) => {
+        const newDoc = await createDocument(title);
         setDocuments([...documents, newDoc]);
-        onDocumentClick(newDoc.content);
+        setOpen(false);
     };
+
+    const handleOpen = () => setOpen(!open);
 
     const darkMode = localStorage.getItem("darkMode") === "true";
 
     return (
         <>
+            <Dialog placeholder={"create-dialog"} open={open} handler={handleOpen}>
+                <DialogHeader placeholder="create-dialog-header">Create Document</DialogHeader>
+                <DialogBody placeholder="create-dialog-body">
+                    <Input crossOrigin="true" placeholder="Title" label="Document Title" onChange={(e) => setNewDoc(e.target.value)} />
+                </DialogBody>
+                <DialogFooter placeholder="create-dialog-footer">
+                    <Button placeholder="create" onClick={() => handleCreate(newDoc)} className="text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 px-4 py-2 rounded-md">
+                        Create
+                    </Button>
+                </DialogFooter>
+            </Dialog>
             {showAlert && (
                 <div className="fixed bottom-0 left-0 right-0 flex justify-center items-center p-4 z-50 transform transition-transform duration-300 ease-in-out">
                     <Alert
@@ -70,7 +100,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                             unmount: { y: 100 }
                         }}
                         onClose={() => setShowAlert(false)}
-                        className="w-60"
+                        className="w-96"
                     >
                         Document deleted successfully!
                     </Alert>
@@ -95,7 +125,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     </List>
                     <List placeholder="list-functions" className="bottom-0 absolute">
                         <hr className="my-2 border-blue-gray-50" />
-                        <IconButton onClick={handleCreate} variant="text" color="blue" placeholder="create">
+                        <IconButton onClick={handleOpen} variant="text" color="blue" placeholder="create">
                             <DocumentPlusIcon className="h-5 w-5" />
                         </IconButton>
                     </List>
