@@ -34,6 +34,17 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         fetchDocuments();
     }, []);
 
+    // make the alert disappear after 3 seconds
+    React.useEffect(() => {
+        if (showAlert) {
+            const timer = setTimeout(() => {
+                setShowAlert(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showAlert]);
+
+
     const openDrawer = () => setIsDrawerOpen(true);
 
     const closeDrawer = () => setIsDrawerOpen(false);
@@ -114,7 +125,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                 )}
             </IconButton>
             <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
-                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="h-[calc(100vh-2rem)] w-full p-4">
+                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="h-full w-full p-4">
                     <div className="p-2">
                         <Input placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
                     </div>
