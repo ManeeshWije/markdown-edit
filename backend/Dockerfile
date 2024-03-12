@@ -1,27 +1,3 @@
-# FROM rust:latest
-#
-# ARG DATABASE_URL
-# ARG GOOGLE_CLIENT_ID
-# ARG GOOGLE_CLIENT_SECRET
-# ARG BASE_URL
-# ARG CLIENT_URL
-#
-# ENV DATABASE_URL=$DATABASE_URL
-# ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-# ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-# ENV BASE_URL=$BASE_URL
-# ENV CLIENT_URL=$CLIENT_URL
-#
-# WORKDIR /usr/src/myapp
-#
-# COPY . .
-#
-# RUN cargo install --path .
-# RUN cargo install cargo-watch
-#
-# EXPOSE 3001
-#
-# CMD ["backend"]
 FROM lukemathwalker/cargo-chef:latest as chef
 
 ARG DATABASE_URL
