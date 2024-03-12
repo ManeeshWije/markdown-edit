@@ -18,7 +18,7 @@ pub fn document_routes(pool: sqlx::PgPool) -> Router {
         .route("/:uuid", get(get_document_by_uuid))
         .route("/all", get(get_all_documents_by_user_uuid))
         .route("/create", post(create_document))
-        .route("/update", put(update_document))
+        .route("/update/:uuid", put(update_document))
         .route("/delete/:uuid", delete(delete_document))
         .with_state(pool)
 }
@@ -105,10 +105,10 @@ async fn create_document(
     // Create the document in the database
     let document = match document_queries::create_document(
         &pool,
-        uuid,
+        uuid.clone().unwrap_or(Uuid::new_v4()),
         user_uuid,
-        title.clone().as_str(),
-        content.clone().as_str(),
+        title.clone().expect("title is required").as_str(),
+        content.clone().expect("content is required").as_str(),
     )
     .await
     {
@@ -125,6 +125,7 @@ async fn create_document(
 async fn update_document(
     cookies: CookieJar,
     State(pool): State<sqlx::PgPool>,
+    params: axum::extract::Path<String>,
     request: Json<Document>,
 ) -> Result<Json<Document>, ErrorResponse> {
     // Check if the user is logged in
@@ -136,9 +137,16 @@ async fn update_document(
         }
     };
 
+    // Parse the UUID from the request parameters
+    let uuid = match Uuid::parse_str(&params) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return Err(ErrorResponse::from(StatusCode::BAD_REQUEST));
+        }
+    };
+
     // Parse the request body
     let request_body = request.0;
-    let uuid = request_body.uuid;
     let title = request_body.title;
     let content = request_body.content;
 
@@ -147,8 +155,8 @@ async fn update_document(
         &pool,
         uuid,
         user_uuid,
-        title.clone().as_str(),
-        content.clone().as_str(),
+        title.clone().expect("title is required").as_str(),
+        content.clone().expect("content is required").as_str(),
     )
     .await
     {

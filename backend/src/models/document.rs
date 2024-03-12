@@ -3,10 +3,10 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Document {
-    pub uuid: Uuid,
-    pub title: String,
-    pub content: String,
-    pub user_uuid: Uuid,
+    pub uuid: Option<Uuid>,
+    pub title: Option<String>,
+    pub content: Option<String>,
+    pub user_uuid: Option<Uuid>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
 }

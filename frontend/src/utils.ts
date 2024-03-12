@@ -94,3 +94,26 @@ export async function deleteDocument(uuid: string): Promise<void> {
         console.warn("Error deleting document: ", error);
     }
 }
+
+export async function updateDocument(uuid: string, title: string, content: string): Promise<Document> {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/update/${uuid}`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                uuid,
+                title,
+                content,
+                updated_at: new Date().toISOString()
+            })
+        });
+        const data: Document = await response.json();
+        return data;
+    } catch (error) {
+        console.warn("Error updating document: ", error);
+        return {} as Document;
+    }
+}

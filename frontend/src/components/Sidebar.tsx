@@ -15,9 +15,9 @@ import {
     DialogFooter,
     Button
 } from "@material-tailwind/react";
-import { DocumentIcon, DocumentPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { DocumentIcon, DocumentPlusIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { getDocuments, deleteDocument, Document, createDocument } from "../utils";
+import { getDocuments, deleteDocument, Document, createDocument, updateDocument } from "../utils";
 
 export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content: string) => void }) {
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -25,6 +25,8 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
     const [showAlert, setShowAlert] = React.useState(false);
     const [open, setOpen] = React.useState(false);
     const [newDoc, setNewDoc] = React.useState("");
+    const [action, setAction] = React.useState("");
+    const [selectedDoc, setSelectedDoc] = React.useState<Document>({} as Document);
 
     React.useEffect(() => {
         const fetchDocuments = async () => {
@@ -44,7 +46,6 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         }
     }, [showAlert]);
 
-
     const openDrawer = () => setIsDrawerOpen(true);
 
     const closeDrawer = () => setIsDrawerOpen(false);
@@ -56,9 +57,12 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     <DocumentIcon className="h-5 w-5" />
                 </ListItemPrefix>
                 <p className={darkMode ? "text-white" : "text-blue-gray-900"}>{doc.title}</p>
-                <ListItemSuffix placeholder="list-item-suffix">
+                <ListItemSuffix className="flex gap-2" placeholder="list-item-suffix">
                     <IconButton onClick={(e) => handleDelete(e, doc)} variant="outlined" color="red" size="sm" placeholder="delete">
                         <TrashIcon className="h-5 w-5" />
+                    </IconButton>
+                    <IconButton onClick={() => handleOpenDialog("update", doc)} variant="outlined" color="blue" size="sm" placeholder="update">
+                        <PencilSquareIcon className="h-5 w-5" />
                     </IconButton>
                 </ListItemSuffix>
             </ListItem>
@@ -80,26 +84,46 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         setShowAlert(true);
     };
 
-    const handleCreate = async (title: string) => {
-        const newDoc = await createDocument(title);
-        setDocuments([...documents, newDoc]);
+    const handleCreateOrUpdate = async (action: string, title: string, doc: Document) => {
+        if (action === "create") {
+            const newDoc = await createDocument(title);
+            setDocuments([...documents, newDoc]);
+        } else {
+            const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
+            const updatedDocs = documents.map((d) => (d.uuid === updatedDoc.uuid ? updatedDoc : d));
+            setDocuments(updatedDocs);
+        }
         setOpen(false);
+        setAction("");
     };
 
-    const handleOpen = () => setOpen(!open);
+    const handleOpenDialog = (action: string, doc: Document) => {
+        if (action === "update") {
+            setNewDoc(doc.title);
+            setSelectedDoc(doc);
+        }
+        setAction(action);
+        setOpen(true);
+    };
 
     const darkMode = localStorage.getItem("darkMode") === "true";
 
     return (
         <>
-            <Dialog placeholder={"create-dialog"} open={open} handler={handleOpen}>
-                <DialogHeader placeholder="create-dialog-header">Create Document</DialogHeader>
-                <DialogBody placeholder="create-dialog-body">
+            <Dialog placeholder={"dialog"} open={open} handler={() => setOpen(!open)}>
+                <DialogHeader placeholder="dialog-header">
+                    <h5 className="text-lg font-bold">{action === "create" ? "Create Document" : "Update Document"}</h5>
+                </DialogHeader>
+                <DialogBody placeholder="dialog-body">
                     <Input crossOrigin="true" placeholder="Title" label="Document Title" onChange={(e) => setNewDoc(e.target.value)} />
                 </DialogBody>
-                <DialogFooter placeholder="create-dialog-footer">
-                    <Button placeholder="create" onClick={() => handleCreate(newDoc)} className="text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 px-4 py-2 rounded-md">
-                        Create
+                <DialogFooter placeholder="dialog-footer">
+                    <Button
+                        placeholder="button"
+                        onClick={() => handleCreateOrUpdate(action, newDoc, selectedDoc)} // pass the first document as a placeholder
+                        className="text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 px-4 py-2 rounded-md"
+                    >
+                        {action === "create" ? "Create" : "Update"}
                     </Button>
                 </DialogFooter>
             </Dialog>
@@ -136,7 +160,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     </List>
                     <List placeholder="list-functions" className="bottom-0 absolute">
                         <hr className="my-2 border-blue-gray-50" />
-                        <IconButton onClick={handleOpen} variant="text" color="blue" placeholder="create">
+                        <IconButton onClick={() => handleOpenDialog("create", documents[0])} variant="text" color="blue" placeholder="create">
                             <DocumentPlusIcon className="h-5 w-5" />
                         </IconButton>
                     </List>
