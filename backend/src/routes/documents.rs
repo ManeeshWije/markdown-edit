@@ -149,6 +149,7 @@ async fn update_document(
     let request_body = request.0;
     let title = request_body.title;
     let content = request_body.content;
+    let updated_at = request_body.updated_at;
 
     // Update the document in the database
     let document = match document_queries::update_document(
@@ -157,6 +158,7 @@ async fn update_document(
         user_uuid,
         title.clone().expect("title is required").as_str(),
         content.clone().expect("content is required").as_str(),
+        updated_at.clone().expect("updated_at is required").as_str(),
     )
     .await
     {

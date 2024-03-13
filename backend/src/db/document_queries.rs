@@ -88,17 +88,19 @@ pub async fn update_document(
     user_uuid: Uuid,
     title: &str,
     content: &str,
+    updated_at: &str,
 ) -> Result<Document, sqlx::Error> {
     let document = sqlx::query_as!(
         Document,
         "
         UPDATE documents
-        SET title = $1, content = $2, updated_at = DEFAULT
-        WHERE uuid = $3 AND user_uuid = $4
+        SET title = $1, content = $2, updated_at = $3
+        WHERE uuid = $4 AND user_uuid = $5
         RETURNING *
         ",
         title,
         content,
+        updated_at,
         uuid,
         user_uuid
     )

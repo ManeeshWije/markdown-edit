@@ -12,6 +12,7 @@
 
 - Ensure Docker and Docker Compose are installed
 - Ensure your environment variables are set in `./backend/.env` and `./frontend/.env`
+    - You can copy the `.env.example` files and fill in the values
 
 ```sh
 docker-compose --env-file ./backend/.env --env-file ./frontend/.env up --build
@@ -22,11 +23,12 @@ docker-compose --env-file ./backend/.env --env-file ./frontend/.env up --build
 - Backend: `http://localhost:3001`
   - The backend will need to be restarted on code changes
   - You can Ctrl+C and then run the `docker-compose` command again
+    - This will not take long because the Docker images are cached (especially the Rust image...)
 
 ### Architecture
 
-- Frontend: TypeScript, React
+- Frontend: TypeScript, React, Tailwind CSS/Material-Tailwind, Zustand
 - Backend: Rust, Axum, Tokio, SQLx
 - Database: PostgreSQL
 - Authentication: Google OAuth2
-- Hosting: Railway via frontend and backend Docker images
+- Hosting: Railway via Docker

@@ -17,16 +17,16 @@ import {
 } from "@material-tailwind/react";
 import { DocumentIcon, DocumentPlusIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { getDocuments, deleteDocument, Document, createDocument, updateDocument } from "../utils";
+import { getDocuments, getDocument, deleteDocument, Document, createDocument, updateDocument } from "../utils";
+import { useStore } from "../store";
 
 export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content: string) => void }) {
+    const { documents, selectedDoc, setDocuments, setSelectedDoc } = useStore();
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-    const [documents, setDocuments] = React.useState<Document[]>([]);
     const [showAlert, setShowAlert] = React.useState(false);
     const [open, setOpen] = React.useState(false);
     const [newDoc, setNewDoc] = React.useState("");
     const [action, setAction] = React.useState("");
-    const [selectedDoc, setSelectedDoc] = React.useState<Document>({} as Document);
 
     React.useEffect(() => {
         const fetchDocuments = async () => {
@@ -34,9 +34,9 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
             setDocuments(documents);
         };
         fetchDocuments();
-    }, []);
+    }, [setDocuments]);
 
-    // make the alert disappear after 3 seconds
+    // show alert for 3 seconds when a document is deleted
     React.useEffect(() => {
         if (showAlert) {
             const timer = setTimeout(() => {
@@ -51,9 +51,10 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
     const closeDrawer = () => setIsDrawerOpen(false);
 
     const getMenuItems = () => {
+        documents.sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1));
         return documents.map((doc: Document) => (
-            <ListItem onClick={() => handleDocumentClick(doc)} key={doc.uuid} placeholder="list-item">
-                <ListItemPrefix placeholder="list-item-prefix">
+            <ListItem onClick={() => handleDocumentClick(doc)} key={doc.uuid} placeholder="list-item" id={`${doc.uuid}`} className="bruh-item">
+                <ListItemPrefix placeholder="list-item-prefix" className={selectedDoc.uuid === doc.uuid ? "text-blue-500" : "text-blue-gray-500"}>
                     <DocumentIcon className="h-5 w-5" />
                 </ListItemPrefix>
                 <p className={darkMode ? "text-white" : "text-blue-gray-900"}>{doc.title}</p>
@@ -61,7 +62,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     <IconButton onClick={(e) => handleDelete(e, doc)} variant="outlined" color="red" size="sm" placeholder="delete">
                         <TrashIcon className="h-5 w-5" />
                     </IconButton>
-                    <IconButton onClick={() => handleOpenDialog("update", doc)} variant="outlined" color="blue" size="sm" placeholder="update">
+                    <IconButton onClick={(e) => handleOpenDialog(e, "update", doc)} variant="outlined" color="blue" size="sm" placeholder="update">
                         <PencilSquareIcon className="h-5 w-5" />
                     </IconButton>
                 </ListItemSuffix>
@@ -69,8 +70,10 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         ));
     };
 
-    const handleDocumentClick = (doc: Document) => {
-        onDocumentClick(doc.content);
+    const handleDocumentClick = async (doc: Document) => {
+        const document = await getDocument(doc.uuid);
+        onDocumentClick(document.content);
+        setSelectedDoc(document);
         closeDrawer();
     };
 
@@ -84,10 +87,14 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         setShowAlert(true);
     };
 
+    // based on the action, create or update the document
+    // combined into one as they are so similar
     const handleCreateOrUpdate = async (action: string, title: string, doc: Document) => {
+        openDrawer();
         if (action === "create") {
             const newDoc = await createDocument(title);
             setDocuments([...documents, newDoc]);
+            setSelectedDoc(newDoc);
         } else {
             const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
             const updatedDocs = documents.map((d) => (d.uuid === updatedDoc.uuid ? updatedDoc : d));
@@ -97,7 +104,9 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         setAction("");
     };
 
-    const handleOpenDialog = (action: string, doc: Document) => {
+    const handleOpenDialog = (e: React.MouseEvent<HTMLButtonElement>, action: string, doc: Document) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (action === "update") {
             setNewDoc(doc.title);
             setSelectedDoc(doc);
@@ -160,7 +169,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     </List>
                     <List placeholder="list-functions" className="bottom-0 absolute">
                         <hr className="my-2 border-blue-gray-50" />
-                        <IconButton onClick={() => handleOpenDialog("create", documents[0])} variant="text" color="blue" placeholder="create">
+                        <IconButton onClick={(e) => handleOpenDialog(e, "create", documents[0])} variant="text" color="blue" placeholder="create">
                             <DocumentPlusIcon className="h-5 w-5" />
                         </IconButton>
                     </List>

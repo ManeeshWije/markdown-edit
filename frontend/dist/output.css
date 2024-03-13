@@ -3384,6 +3384,8 @@ body {
   flex: 1;
   overflow-y: auto;
   display: none;
+  padding-left: 20px;
+  border-left: 5px solid black;
 }
 
 .preview-visible .preview-column {
