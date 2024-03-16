@@ -4,7 +4,7 @@
   - Google OAuth2 authentication
   - Create, read, update, and delete markdown files
   - Real-time preview of markdown files
-  - Export markdown files to PDF
+  - Export markdown files to HTML
   - Dark mode
   - Responsive design
 

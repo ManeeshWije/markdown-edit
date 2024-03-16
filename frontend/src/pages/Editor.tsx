@@ -1,5 +1,6 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
+import { basicSetup } from "@uiw/react-codemirror";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
@@ -85,6 +86,12 @@ export default function Editor() {
                                 markdown({
                                     base: markdownLanguage,
                                     codeLanguages: languages
+                                }),
+                                basicSetup({
+                                    foldGutter: false,
+                                    dropCursor: false,
+                                    allowMultipleSelections: false,
+                                    indentOnInput: false
                                 })
                             ]}
                             theme={darkMode ? githubDark : githubLight}

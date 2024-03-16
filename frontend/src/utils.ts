@@ -117,3 +117,37 @@ export async function updateDocument(uuid: string, title: string, content: strin
         return {} as Document;
     }
 }
+
+export async function exportToHTML(filename: string, markdownContent: string) {
+    const url = "https://api.github.com/markdown";
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            text: markdownContent,
+            mode: "markdown"
+        })
+    };
+    const response = await fetch(url, options);
+    const html = await response.text();
+    const styledHTML = `
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                    }
+                </style>
+            </head>
+            <body>${html}</body>
+            </html>
+            `;
+    const blob = new Blob([styledHTML], { type: "text/html" });
+    const objURL = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objURL;
+    a.download = `${filename}.html`;
+    a.click();
+}

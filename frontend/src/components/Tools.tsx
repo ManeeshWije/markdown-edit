@@ -1,6 +1,8 @@
 import { Navbar, Button } from "@material-tailwind/react";
 import Sidebar from "./Sidebar";
 import Logout from "./Logout";
+import { exportToHTML } from "../utils";
+import { useStore } from "../store";
 
 interface ToolsProps {
     onTogglePreview: () => void;
@@ -10,6 +12,7 @@ interface ToolsProps {
 }
 
 const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, onDocumentClick, darkMode }) => {
+    const { selectedDoc } = useStore();
     return (
         <>
             <Navbar
@@ -23,6 +26,9 @@ const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, onDocu
                     </Button>
                     <Button placeholder="Toggle Dark Mode" variant="gradient" size="sm" className="lg:inline-block" onClick={onToggleDarkMode}>
                         Toggle Dark Mode
+                    </Button>
+                    <Button placeholder="Export" variant="gradient" size="sm" className="lg:inline-block" onClick={() => exportToHTML(selectedDoc.title, selectedDoc.content)}>
+                        Export to HTML
                     </Button>
                     <Logout />
                 </div>
