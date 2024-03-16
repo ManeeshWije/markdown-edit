@@ -40,10 +40,15 @@ export default function Editor() {
         const timer = setTimeout(() => {
             if (hasDocument) {
                 updateDocument(selectedDoc.uuid, selectedDoc.title, markdownContent);
+                documents.forEach((doc) => {
+                    if (doc.uuid === selectedDoc.uuid) {
+                        doc.content = markdownContent;
+                    }
+                });
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [markdownContent, selectedDoc, hasDocument]);
+    }, [markdownContent, selectedDoc, hasDocument, documents]);
 
     const handleCodeMirrorChange = (value: string) => {
         setMarkdownContent(value);
@@ -60,10 +65,6 @@ export default function Editor() {
         localStorage.setItem("darkMode", JSON.stringify(newDarkMode));
     };
 
-    const updateEditorContent = (content: string) => {
-        setMarkdownContent(content);
-    };
-
     const emptyDocuments = () => {
         return (
             <div className="alert">
@@ -74,7 +75,7 @@ export default function Editor() {
 
     return (
         <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
-            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} onDocumentClick={updateEditorContent} />
+            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} onDocumentClick={handleCodeMirrorChange} />
             {hasDocument ? (
                 <div className="editor-wrapper">
                     <div className="editor-column">

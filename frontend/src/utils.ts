@@ -82,7 +82,7 @@ export async function createDocument(title: string): Promise<Document> {
     }
 }
 
-export async function deleteDocument(uuid: string): Promise<void> {
+export async function deleteDocument(uuid: string): Promise<Document> {
     try {
         const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/delete/${uuid}`, {
             method: "DELETE",
@@ -92,6 +92,7 @@ export async function deleteDocument(uuid: string): Promise<void> {
         return data;
     } catch (error) {
         console.warn("Error deleting document: ", error);
+        return {} as Document;
     }
 }
 

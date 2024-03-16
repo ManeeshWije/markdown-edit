@@ -51,9 +51,9 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
     const closeDrawer = () => setIsDrawerOpen(false);
 
     const getMenuItems = () => {
-        documents.sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1));
+        // documents.sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1));
         return documents.map((doc: Document) => (
-            <ListItem onClick={() => handleDocumentClick(doc)} key={doc.uuid} placeholder="list-item" id={`${doc.uuid}`} className="bruh-item">
+            <ListItem onClick={() => handleDocumentClick(doc)} key={doc.uuid} placeholder="list-item" id={`${doc.uuid}`} className="h-full">
                 <ListItemPrefix placeholder="list-item-prefix" className={selectedDoc.uuid === doc.uuid ? "text-blue-500" : "text-blue-gray-500"}>
                     <DocumentIcon className="h-5 w-5" />
                 </ListItemPrefix>
@@ -77,13 +77,18 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         closeDrawer();
     };
 
-    const handleDelete = (e: React.MouseEvent<HTMLButtonElement>, doc: Document) => {
+    const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>, doc: Document) => {
         e.stopPropagation();
-        deleteDocument(doc.uuid);
-        setDocuments(documents.filter((d) => d.uuid !== doc.uuid));
-        onDocumentClick("");
-        doc.content = "";
-        onDocumentClick(documents[0].content);
+        await deleteDocument(doc.uuid);
+        const newDocs = documents.filter((d) => d.uuid !== doc.uuid);
+        setDocuments(newDocs);
+        if (newDocs.length > 0) {
+            setSelectedDoc(newDocs[0]);
+            onDocumentClick(newDocs[0].content);
+        } else {
+            setSelectedDoc({} as Document);
+            onDocumentClick("");
+        }
         setShowAlert(true);
     };
 
@@ -94,6 +99,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         if (action === "create") {
             const newDoc = await createDocument(title);
             setDocuments([...documents, newDoc]);
+            onDocumentClick(newDoc.content);
             setSelectedDoc(newDoc);
         } else {
             const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
@@ -158,17 +164,19 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                 )}
             </IconButton>
             <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
-                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="h-full w-full p-4">
+                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col h-full">
                     <div className="p-2">
                         <Input placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
                     </div>
-                    <List placeholder="list-documents">
-                        <hr className="my-2 border-blue-gray-50" />
-                        <p className="align-middle text-center">All Documents</p>
-                        {getMenuItems()}
-                    </List>
+                    <div className="overflow-auto" style={{ maxHeight: "calc(100% - 110px)" }}>
+                        <List placeholder="list-documents">
+                            <hr className="my-2 border-blue-gray-50" />
+                            <p className="align-middle text-center">All Documents</p>
+                            <div style={{ maxHeight: "500px", overflowY: "auto" }}>{getMenuItems()}</div>
+                        </List>
+                    </div>
+                    <hr className="my-2 border-blue-gray-50" />
                     <List placeholder="list-functions" className="bottom-0 absolute">
-                        <hr className="my-2 border-blue-gray-50" />
                         <IconButton onClick={(e) => handleOpenDialog(e, "create", documents[0])} variant="text" color="blue" placeholder="create">
                             <DocumentPlusIcon className="h-5 w-5" />
                         </IconButton>
