@@ -13,7 +13,8 @@ import {
     DialogHeader,
     DialogBody,
     DialogFooter,
-    Button
+    Button,
+    Typography
 } from "@material-tailwind/react";
 import { DocumentIcon, DocumentPlusIcon, TrashIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -27,6 +28,8 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
     const [open, setOpen] = React.useState(false);
     const [newDoc, setNewDoc] = React.useState("");
     const [action, setAction] = React.useState("");
+    const [search, setSearch] = React.useState("");
+    const [filteredDocs, setFilteredDocs] = React.useState<Document[]>([]);
 
     React.useEffect(() => {
         const fetchDocuments = async () => {
@@ -46,18 +49,32 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         }
     }, [showAlert]);
 
-    const openDrawer = () => setIsDrawerOpen(true);
+    const openDrawer = () => {
+        // fetch documents again to get the latest documents
+        const fetchDocuments = async () => {
+            const documents = await getDocuments();
+            setDocuments(documents);
+        };
+        fetchDocuments();
+        setIsDrawerOpen(true);
+    };
 
     const closeDrawer = () => setIsDrawerOpen(false);
 
     const getMenuItems = () => {
-        // documents.sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1));
-        return documents.map((doc: Document) => (
+        const docs = search ? filteredDocs : documents;
+        docs.sort((a, b) => (a.updated_at > b.updated_at ? -1 : 1));
+        return docs.map((doc: Document) => (
             <ListItem onClick={() => handleDocumentClick(doc)} key={doc.uuid} placeholder="list-item" id={`${doc.uuid}`} className="h-full">
                 <ListItemPrefix placeholder="list-item-prefix" className={selectedDoc.uuid === doc.uuid ? "text-blue-500" : "text-blue-gray-500"}>
                     <DocumentIcon className="h-5 w-5" />
                 </ListItemPrefix>
-                <p className={darkMode ? "text-white" : "text-blue-gray-900"}>{doc.title}</p>
+                <div className="flex flex-col">
+                    <Typography variant="lead" className={darkMode ? "text-white" : "text-blue-gray-900"}>{doc.title}</Typography>
+                    <Typography variant="small">
+                        {new Date(doc.updated_at).toLocaleDateString()} {new Date(doc.updated_at).toLocaleTimeString()}
+                    </Typography>
+                </div>
                 <ListItemSuffix className="flex gap-2" placeholder="list-item-suffix">
                     <IconButton onClick={(e) => handleDelete(e, doc)} variant="outlined" color="red" size="sm" placeholder="delete">
                         <TrashIcon className="h-5 w-5" />
@@ -82,6 +99,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         await deleteDocument(doc.uuid);
         const newDocs = documents.filter((d) => d.uuid !== doc.uuid);
         setDocuments(newDocs);
+        setFilteredDocs(newDocs);
         if (newDocs.length > 0) {
             setSelectedDoc(newDocs[0]);
             onDocumentClick(newDocs[0].content);
@@ -105,6 +123,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
             const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
             const updatedDocs = documents.map((d) => (d.uuid === updatedDoc.uuid ? updatedDoc : d));
             setDocuments(updatedDocs);
+            setFilteredDocs(updatedDocs);
         }
         setOpen(false);
         setAction("");
@@ -119,6 +138,12 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         }
         setAction(action);
         setOpen(true);
+    };
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+        const filteredDocs = documents.filter((doc) => doc.title.toLowerCase().includes(e.target.value.toLowerCase()));
+        setFilteredDocs(filteredDocs);
     };
 
     const darkMode = localStorage.getItem("darkMode") === "true";
@@ -164,9 +189,9 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                 )}
             </IconButton>
             <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
-                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col h-full">
+                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col h-screen">
                     <div className="p-2">
-                        <Input placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
+                        <Input onChange={(e) => handleSearch(e)} placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
                     </div>
                     <div className="overflow-auto" style={{ maxHeight: "calc(100% - 110px)" }}>
                         <List placeholder="list-documents">
