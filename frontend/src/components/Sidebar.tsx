@@ -189,7 +189,7 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                 )}
             </IconButton>
             <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
-                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col h-screen">
+                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col min-h-screen">
                     <div className="p-2">
                         <Input onChange={(e) => handleSearch(e)} placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
                     </div>
