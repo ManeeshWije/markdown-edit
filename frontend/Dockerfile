@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:lts
 
 ARG VITE_SERVER_URL
 

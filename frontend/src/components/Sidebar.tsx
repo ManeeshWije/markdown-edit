@@ -70,7 +70,9 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     <DocumentIcon className="h-5 w-5" />
                 </ListItemPrefix>
                 <div className="flex flex-col">
-                    <Typography variant="lead" className={darkMode ? "text-white" : "text-blue-gray-900"}>{doc.title}</Typography>
+                    <Typography variant="lead" className={darkMode ? "text-white" : "text-blue-gray-900"}>
+                        {doc.title}
+                    </Typography>
                     <Typography variant="small">
                         {new Date(doc.updated_at).toLocaleDateString()} {new Date(doc.updated_at).toLocaleTimeString()}
                     </Typography>
@@ -150,6 +152,29 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
 
     return (
         <>
+            <IconButton placeholder="icon-button" variant="text" size="lg" onClick={openDrawer}>
+                {isDrawerOpen ? (
+                    <XMarkIcon className={darkMode ? "h-8 w-8 stroke-2 text-white" : "h-8 w-8 stroke-2"} />
+                ) : (
+                    <Bars3Icon className={darkMode ? "h-8 w-8 stroke-2 text-white" : "h-8 w-8 stroke-2"} />
+                )}
+            </IconButton>
+            <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
+                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col">
+                    <div className="p-2">
+                        <Input onChange={(e) => handleSearch(e)} placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
+                    </div>
+                    <List placeholder="list-documents">
+                        <hr className="my-2 border-blue-gray-50" />
+                        <p className="align-middle text-center">All Documents</p>
+                        <div style={{ maxHeight: "300px", overflowY: "auto" }}>{getMenuItems()}</div>
+                        <hr className="my-2 border-blue-gray-50" />
+                    </List>
+                    <IconButton onClick={(e) => handleOpenDialog(e, "create", documents[0])} variant="text" color="blue" placeholder="create">
+                        <DocumentPlusIcon className="h-5 w-5" />
+                    </IconButton>
+                </Card>
+            </Drawer>
             <Dialog placeholder={"dialog"} open={open} handler={() => setOpen(!open)}>
                 <DialogHeader placeholder="dialog-header">
                     <h5 className="text-lg font-bold">{action === "create" ? "Create Document" : "Update Document"}</h5>
@@ -181,33 +206,6 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
                     </Alert>
                 </div>
             )}
-            <IconButton placeholder="icon-button" variant="text" size="lg" onClick={openDrawer}>
-                {isDrawerOpen ? (
-                    <XMarkIcon className={darkMode ? "h-8 w-8 stroke-2 text-white" : "h-8 w-8 stroke-2"} />
-                ) : (
-                    <Bars3Icon className={darkMode ? "h-8 w-8 stroke-2 text-white" : "h-8 w-8 stroke-2"} />
-                )}
-            </IconButton>
-            <Drawer className={darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"} placeholder="drawer" open={isDrawerOpen} onClose={closeDrawer} overlay={false}>
-                <Card placeholder="card" color={darkMode ? "gray" : "white"} shadow={true} className="p-4 flex flex-col min-h-screen">
-                    <div className="p-2">
-                        <Input onChange={(e) => handleSearch(e)} placeholder="Search" crossOrigin="true" icon={<MagnifyingGlassIcon className="h-5 w-5" />} label="Search" />
-                    </div>
-                    <div className="overflow-auto" style={{ maxHeight: "calc(100% - 110px)" }}>
-                        <List placeholder="list-documents">
-                            <hr className="my-2 border-blue-gray-50" />
-                            <p className="align-middle text-center">All Documents</p>
-                            <div style={{ maxHeight: "500px", overflowY: "auto" }}>{getMenuItems()}</div>
-                        </List>
-                    </div>
-                    <hr className="my-2 border-blue-gray-50" />
-                    <List placeholder="list-functions" className="bottom-0 absolute">
-                        <IconButton onClick={(e) => handleOpenDialog(e, "create", documents[0])} variant="text" color="blue" placeholder="create">
-                            <DocumentPlusIcon className="h-5 w-5" />
-                        </IconButton>
-                    </List>
-                </Card>
-            </Drawer>
         </>
     );
 }

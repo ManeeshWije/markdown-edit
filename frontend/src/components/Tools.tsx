@@ -19,7 +19,7 @@ const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, onDocu
                 placeholder="navbar"
                 className={`sticky top-0 z-10 h-max max-w-full rounded-none py-2 px-4 lg:px-8 lg:py-4 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-blue-gray-900"}`}
             >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-evenly">
                     <Sidebar onDocumentClick={onDocumentClick ? onDocumentClick : () => {}} />
                     <Button placeholder="Toggle Preview" variant="gradient" size="sm" className="lg:inline-block" onClick={onTogglePreview}>
                         Toggle Preview
