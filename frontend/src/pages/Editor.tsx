@@ -19,6 +19,16 @@ export default function Editor() {
     const [darkMode, setDarkMode] = React.useState(false);
     const [hasDocument, setHasDocument] = React.useState(false);
 
+    const selectedDocRef = React.useRef(selectedDoc);
+
+    // update selectedDocRef whenever selectedDoc changes
+    React.useEffect(() => {
+        selectedDocRef.current = selectedDoc;
+        if (selectedDoc && selectedDoc.content) {
+            setMarkdownContent(selectedDoc.content);
+        }
+    }, [selectedDoc]);
+
     // if there are documents, set the first document as the selected document
     React.useEffect(() => {
         if (documents.length > 0) {
@@ -35,11 +45,11 @@ export default function Editor() {
         document.body.classList.toggle("dark-mode", isDarkMode);
     }, [documents, selectedDoc, setSelectedDoc]);
 
-    // update the document content when the markdown content changes
+    // update 500ms after typing stops
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            if (hasDocument) {
-                updateDocument(selectedDoc.uuid, selectedDoc.title, markdownContent);
+        const timer = setTimeout(async () => {
+            if (hasDocument && selectedDocRef.current.uuid === selectedDoc.uuid) {
+                await updateDocument(selectedDoc.uuid, selectedDoc.title, markdownContent);
                 documents.forEach((doc) => {
                     if (doc.uuid === selectedDoc.uuid) {
                         doc.content = markdownContent;
@@ -75,7 +85,7 @@ export default function Editor() {
 
     return (
         <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
-            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} onDocumentClick={handleCodeMirrorChange} />
+            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} />
             {hasDocument ? (
                 <div className="editor-wrapper">
                     <div className="editor-column">

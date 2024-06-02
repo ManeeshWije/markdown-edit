@@ -66,3 +66,4 @@ TEST-results.xml
 dist/assets/
 dist/index.html
 package-lock.json
+bun.lockb

@@ -21,7 +21,7 @@ import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/o
 import { getDocuments, getDocument, deleteDocument, Document, createDocument, updateDocument } from "../utils";
 import { useStore } from "../store";
 
-export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content: string) => void }) {
+export default function Sidebar() {
     const { documents, selectedDoc, setDocuments, setSelectedDoc } = useStore();
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
     const [showAlert, setShowAlert] = React.useState(false);
@@ -91,7 +91,6 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
 
     const handleDocumentClick = async (doc: Document) => {
         const document = await getDocument(doc.uuid);
-        onDocumentClick(document.content);
         setSelectedDoc(document);
         closeDrawer();
     };
@@ -104,10 +103,8 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         setFilteredDocs(newDocs);
         if (newDocs.length > 0) {
             setSelectedDoc(newDocs[0]);
-            onDocumentClick(newDocs[0].content);
         } else {
             setSelectedDoc({} as Document);
-            onDocumentClick("");
         }
         setShowAlert(true);
     };
@@ -119,7 +116,6 @@ export default function Sidebar({ onDocumentClick }: { onDocumentClick: (content
         if (action === "create") {
             const newDoc = await createDocument(title);
             setDocuments([...documents, newDoc]);
-            onDocumentClick(newDoc.content);
             setSelectedDoc(newDoc);
         } else {
             const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
