@@ -32,7 +32,7 @@ jobs:
       run: docker build --build-arg VITE_SERVER_URL=$VITE_SERVER_URL . --file Dockerfile --tag maneeshwije/markdown-edit-frontend
       
     - name: Log in to DockerHub
-      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Push Docker images to DockerHub
       run: docker push maneeshwije/markdown-edit-backend && docker push maneeshwije/markdown-edit-frontend
