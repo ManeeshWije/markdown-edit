@@ -14,9 +14,9 @@ export default function Footer() {
                     </Typography>
                 </li>
                 <li>
-                    <Typography placeholder="Made with ❤️ by Maneesh" color="blue-gray" className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500">
+                    <Typography placeholder="Made with ❤️ by Maneesh" color="blue-gray" className="font-normal transition-colors">
                         Made with ❤️ by{" "}
-                        <a href="https://github.com/ManeeshWije" target="_blank" rel="noreferrer" className="transition-colors hover:text-blue-500 focus:text-blue-500">
+                        <a href="https://github.com/ManeeshWije/markdown-edit" target="_blank" rel="noreferrer" className="transition-colors hover:text-blue-500 focus:text-blue-500">
                             Maneesh
                         </a>
                     </Typography>
