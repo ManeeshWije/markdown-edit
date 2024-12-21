@@ -18,6 +18,7 @@ export default function Editor() {
     const [showPreview, setShowPreview] = React.useState(false);
     const [darkMode, setDarkMode] = React.useState(false);
     const [hasDocument, setHasDocument] = React.useState(false);
+    const [isTyping, setIsTyping] = React.useState(false);
 
     const selectedDocRef = React.useRef(selectedDoc);
 
@@ -48,7 +49,7 @@ export default function Editor() {
     // update 500ms after typing stops
     React.useEffect(() => {
         const timer = setTimeout(async () => {
-            if (hasDocument && selectedDocRef.current.uuid === selectedDoc.uuid) {
+            if (hasDocument && selectedDocRef.current.uuid === selectedDoc.uuid && isTyping) {
                 await updateDocument(selectedDoc.uuid, selectedDoc.title, markdownContent);
                 documents.forEach((doc) => {
                     if (doc.uuid === selectedDoc.uuid) {
@@ -58,10 +59,14 @@ export default function Editor() {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [markdownContent, selectedDoc, hasDocument, documents]);
+    }, [markdownContent, selectedDoc, isTyping, hasDocument, documents]);
 
     const handleCodeMirrorChange = (value: string) => {
         setMarkdownContent(value);
+    };
+
+    const handleTypingStop = () => {
+        setIsTyping(false);
     };
 
     const togglePreview = () => {
@@ -93,6 +98,8 @@ export default function Editor() {
                             value={markdownContent}
                             autoFocus
                             onChange={handleCodeMirrorChange}
+                            onBlur={handleTypingStop}
+                            onKeyDown={() => setIsTyping(true)}
                             extensions={[
                                 markdown({
                                     base: markdownLanguage,
