@@ -25,9 +25,7 @@ export default function Editor() {
     // update selectedDocRef whenever selectedDoc changes
     React.useEffect(() => {
         selectedDocRef.current = selectedDoc;
-        if (selectedDoc && selectedDoc.content) {
-            setMarkdownContent(selectedDoc.content);
-        }
+        setMarkdownContent(selectedDoc.content || "");
     }, [selectedDoc]);
 
     // if there are documents, set the first document as the selected document

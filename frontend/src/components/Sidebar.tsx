@@ -115,8 +115,9 @@ export default function Sidebar() {
         openDrawer();
         if (action === "create") {
             const newDoc = await createDocument(title);
-            setDocuments([...documents, newDoc]);
-            setSelectedDoc(newDoc);
+            const fetchedDoc = await getDocument(newDoc.uuid);
+            setDocuments([...documents, fetchedDoc]);
+            setSelectedDoc(fetchedDoc);
         } else {
             const updatedDoc = await updateDocument(doc.uuid, title, doc.content);
             const updatedDocs = documents.map((d) => (d.uuid === updatedDoc.uuid ? updatedDoc : d));
@@ -133,6 +134,8 @@ export default function Sidebar() {
         if (action === "update") {
             setNewDoc(doc.title);
             setSelectedDoc(doc);
+        } else {
+            setNewDoc("");
         }
         setAction(action);
         setOpen(true);
@@ -166,7 +169,7 @@ export default function Sidebar() {
                         <div style={{ maxHeight: "300px", overflowY: "auto" }}>{getMenuItems()}</div>
                         <hr className="my-2 border-blue-gray-50" />
                     </List>
-                    <IconButton onClick={(e) => handleOpenDialog(e, "create", documents[0])} variant="text" color="blue" placeholder="create">
+                    <IconButton onClick={(e) => handleOpenDialog(e, "create", {} as Document)} variant="text" color="blue" placeholder="create">
                         <DocumentPlusIcon className="h-5 w-5" />
                     </IconButton>
                 </Card>
