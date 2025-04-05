@@ -209,29 +209,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "axum-extra",
- "chrono",
- "cookie",
- "dotenv",
- "headers 0.3.9",
- "http 1.1.0",
- "oauth2",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "time",
- "tokio",
- "tower-http",
- "uuid",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1173,6 +1150,29 @@ name = "log"
 version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
+
+[[package]]
+name = "markdown-edit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-extra",
+ "chrono",
+ "cookie",
+ "dotenv",
+ "headers 0.3.9",
+ "http 1.1.0",
+ "oauth2",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "time",
+ "tokio",
+ "tower-http",
+ "uuid",
+]
 
 [[package]]
 name = "matchit"

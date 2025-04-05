@@ -12,8 +12,8 @@ FROM --platform=$TARGETPLATFORM node:20-slim AS jbuilder
 WORKDIR /frontend
 COPY frontend .
 RUN npm install
-RUN npm run build
 RUN npx tailwindcss -i ./src/input.css -o ./src/output.css
+RUN npm run build
 
 FROM --platform=$TARGETPLATFORM debian:bookworm-slim AS release
 WORKDIR /app
