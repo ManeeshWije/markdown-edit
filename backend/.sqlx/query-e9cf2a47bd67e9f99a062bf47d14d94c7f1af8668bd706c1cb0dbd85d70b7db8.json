@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        UPDATE documents\n        SET title = $1, content = $2, updated_at = DEFAULT\n        WHERE uuid = $3 AND user_uuid = $4\n        RETURNING *\n        ",
+  "query": "\n        UPDATE documents\n        SET title = $1, content = $2, updated_at = $3\n        WHERE uuid = $4 AND user_uuid = $5\n        RETURNING *\n        ",
   "describe": {
     "columns": [
       {
@@ -38,6 +38,7 @@
       "Left": [
         "Varchar",
         "Text",
+        "Varchar",
         "Uuid",
         "Uuid"
       ]
@@ -51,5 +52,5 @@
       true
     ]
   },
-  "hash": "474b6550de2e4d547a2d23707323968650cb20ba2abd419936de3fda106c1630"
+  "hash": "e9cf2a47bd67e9f99a062bf47d14d94c7f1af8668bd706c1cb0dbd85d70b7db8"
 }

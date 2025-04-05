@@ -15,9 +15,11 @@ export interface Document {
     updated_at: string;
 }
 
+const serverUrl = import.meta.env.MODE === "production" ? "" : "http://localhost:8080"
+
 export async function checkAuthentication(): Promise<User | null> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/users/me`, {
+        const response = await fetch(`${serverUrl}/users/me`, {
             method: "GET",
             credentials: "include"
         });
@@ -31,7 +33,7 @@ export async function checkAuthentication(): Promise<User | null> {
 
 export async function getDocuments(): Promise<Document[]> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/all`, {
+        const response = await fetch(`${serverUrl}/documents/all`, {
             method: "GET",
             credentials: "include"
         });
@@ -45,7 +47,7 @@ export async function getDocuments(): Promise<Document[]> {
 
 export async function getDocument(uuid: string): Promise<Document> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/${uuid}`, {
+        const response = await fetch(`${serverUrl}/documents/${uuid}`, {
             method: "GET",
             credentials: "include"
         });
@@ -59,7 +61,7 @@ export async function getDocument(uuid: string): Promise<Document> {
 
 export async function createDocument(title: string): Promise<Document> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/create`, {
+        const response = await fetch(`${serverUrl}/documents/create`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -84,7 +86,7 @@ export async function createDocument(title: string): Promise<Document> {
 
 export async function deleteDocument(uuid: string): Promise<Document> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/delete/${uuid}`, {
+        const response = await fetch(`${serverUrl}/documents/delete/${uuid}`, {
             method: "DELETE",
             credentials: "include"
         });
@@ -98,7 +100,7 @@ export async function deleteDocument(uuid: string): Promise<Document> {
 
 export async function updateDocument(uuid: string, title: string, content: string): Promise<Document> {
     try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/documents/update/${uuid}`, {
+        const response = await fetch(`${serverUrl}/documents/update/${uuid}`, {
             method: "PUT",
             credentials: "include",
             headers: {

@@ -10,20 +10,21 @@
 
 ### Development
 
-- Ensure Docker and Docker Compose are installed
-- Ensure your environment variables are set in `./backend/.env` and `./frontend/.env`
-    - You can copy the `.env.example` files and fill in the values
+### Server
 
-```sh
-docker-compose --env-file ./backend/.env --env-file ./frontend/.env up --build
-```
+- These env vars must be set in `.env`
+  - DATABASE_URL=postgres://test:test@test/test
+  - GOOGLE_CLIENT_ID=\<google_client_id\>
+  - GOOGLE_CLIENT_SECRET=\<google_client_secret\>
+  - BASE_URL=http://localhost:8080
+  - CLIENT_URL=http://localhost:5173
+- `cargo run`
 
-- Frontend: `http://localhost:3000`
-  - The frontend will hot reload on code changes
-- Backend: `http://localhost:3001`
-  - The backend will need to be restarted on code changes
-  - You can Ctrl+C and then run the `docker-compose` command again
-    - This will not take long because the Docker images are cached (especially the Rust image...)
+### Client
+
+- `npm install`
+- `npm run dev` to watch dev
+- `npm run style` to watch tailwind styles
 
 ### Architecture
 
@@ -31,4 +32,4 @@ docker-compose --env-file ./backend/.env --env-file ./frontend/.env up --build
 - Backend: Rust, Axum, Tokio, SQLx
 - Database: PostgreSQL
 - Authentication: Google OAuth2
-- Hosting: Railway via Docker
+- Hosting: Self hosted on [homelab](https://github.com/ManeeshWije/homelab)

@@ -2,7 +2,7 @@ mod db;
 mod models;
 mod routes;
 mod utils;
-use axum::{routing::get, Router};
+use axum::Router;
 use dotenv::dotenv;
 use http::{HeaderValue, Method};
 use http::header::CONTENT_TYPE;
@@ -12,7 +12,7 @@ use routes::users::users_routes;
 use std::env;
 use std::time::Duration;
 use tokio::time;
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, services::ServeDir};
 
 #[tokio::main]
 async fn main() {
@@ -26,7 +26,7 @@ async fn main() {
         });
 
     // bind the server to the address and port
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
     // spawn a task to delete expired sessions periodically
     tokio::spawn(delete_expired_sessions_periodically(pool.clone()));
@@ -46,21 +46,23 @@ async fn main() {
     let users_router = users_routes(pool.clone()).layer(cors_middleware.clone());
     let documents_router = document_routes(pool.clone()).layer(cors_middleware.clone());
 
+    let dist_dir = if cfg!(debug_assertions) {
+        "../frontend/dist/"
+    } else {
+        "./dist"
+    };
+
     let app = Router::new()
+        .nest_service("/", ServeDir::new(dist_dir))
         .nest("/auth", auth_router)
         .nest("/users", users_router)
-        .nest("/documents", documents_router)
-        .route("/", get(root).layer(cors_middleware.clone()));
+        .nest("/documents", documents_router);
 
     // start the server
     axum::serve(listener, app).await.unwrap_or_else(|err| {
         eprintln!("Server error: {}", err);
         std::process::exit(1);
     })
-}
-
-async fn root() -> &'static str {
-    "Hello, World!"
 }
 
 async fn delete_expired_sessions_periodically(pool: sqlx::PgPool) {
