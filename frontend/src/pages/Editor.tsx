@@ -90,7 +90,7 @@ export default function Editor() {
 
     return (
         <div className={`editor-container ${showPreview ? "preview-visible" : ""}`}>
-            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+            <Tools onTogglePreview={togglePreview} onToggleDarkMode={toggleDarkMode} darkMode={darkMode} currentContent={markdownContent} />
             {hasDocument ? (
                 <div className="editor-wrapper">
                     <div className="editor-column">

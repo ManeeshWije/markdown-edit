@@ -9,9 +9,10 @@ interface ToolsProps {
     onTogglePreview: () => void;
     onToggleDarkMode: () => void;
     darkMode: boolean;
+    currentContent: string;
 }
 
-const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, darkMode }) => {
+const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, darkMode, currentContent }) => {
     const { selectedDoc } = useStore();
 
     const selectedDocRef = React.useRef(selectedDoc);
@@ -41,7 +42,7 @@ const Tools: React.FC<ToolsProps> = ({ onTogglePreview, onToggleDarkMode, darkMo
                         className="lg:inline-block"
                         onClick={() => {
                             if (selectedDocRef.current.uuid === selectedDoc.uuid) {
-                                exportToHTML(selectedDoc.title, selectedDoc.content);
+                                exportToHTML(selectedDoc.title, currentContent);
                             }
                         }}
                     >
