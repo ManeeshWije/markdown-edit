@@ -32,4 +32,4 @@
 - Backend: Rust, Axum, Tokio, SQLx
 - Database: PostgreSQL
 - Authentication: Google OAuth2
-- Hosting: Self hosted on [homelab](https://github.com/ManeeshWije/homelab)
+- Hosting: Railway

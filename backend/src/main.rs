@@ -25,8 +25,15 @@ async fn main() {
             std::process::exit(1);
         });
 
-    // bind the server to the address and port
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse::<u16>()
+        .expect("PORT must be a valid u16");
+
+    // run it with hyper
+    let listener = tokio::net::TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], port)))
+        .await
+        .unwrap();
 
     // spawn a task to delete expired sessions periodically
     tokio::spawn(delete_expired_sessions_periodically(pool.clone()));
