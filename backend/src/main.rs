@@ -4,13 +4,13 @@ mod routes;
 mod utils;
 use axum::Router;
 use dotenv::dotenv;
-use http::{HeaderValue, Method};
 use http::header::CONTENT_TYPE;
+use http::{HeaderValue, Method};
 use routes::auth::google_auth_router;
 use routes::documents::document_routes;
 use routes::users::users_routes;
-use std::env;
 use std::time::Duration;
+use std::{env, net::SocketAddr};
 use tokio::time;
 use tower_http::{cors::CorsLayer, services::ServeDir};
 
